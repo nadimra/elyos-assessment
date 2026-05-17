@@ -1,0 +1,1446 @@
+{
+  "run_started_at": "2026-05-17T22:07:15.487781+00:00",
+  "run_finished_at": "2026-05-17T22:15:29.899141+00:00",
+  "base_url": "https://elyos-interview-907656039105.europe-west2.run.app",
+  "probes": [
+    {
+      "name": "happy-london",
+      "category": "happy",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/weather",
+      "params": {
+        "location": "London"
+      },
+      "auth": "valid",
+      "status": 200,
+      "elapsed_ms": 1268.2,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "9c5cbdcce53d1af375c87df989723b34;o=1",
+        "date": "Sun, 17 May 2026 22:07:16 GMT",
+        "server": "Google Frontend",
+        "content-length": "88",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "location": "London",
+        "temperature_c": 9.2,
+        "condition": "Patchy rain nearby",
+        "humidity": 76
+      },
+      "error": null
+    },
+    {
+      "name": "happy-tokyo",
+      "category": "happy",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/weather",
+      "params": {
+        "location": "Tokyo"
+      },
+      "auth": "valid",
+      "status": 200,
+      "elapsed_ms": 107.8,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "dd508131ce5c084375c87df989723b98",
+        "date": "Sun, 17 May 2026 22:07:16 GMT",
+        "server": "Google Frontend",
+        "content-length": "75",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "location": "Tokyo",
+        "temperature_c": 20.1,
+        "condition": "Sunny",
+        "humidity": 83
+      },
+      "error": null
+    },
+    {
+      "name": "happy-newyork",
+      "category": "happy",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/weather",
+      "params": {
+        "location": "New York"
+      },
+      "auth": "valid",
+      "status": 200,
+      "elapsed_ms": 109.2,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "0204fc1d9b7b2e8775c87df989723568",
+        "date": "Sun, 17 May 2026 22:07:16 GMT",
+        "server": "Google Frontend",
+        "content-length": "86",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "location": "New York",
+        "temperature_c": 28.9,
+        "condition": "Partly cloudy",
+        "humidity": 43
+      },
+      "error": null
+    },
+    {
+      "name": "ambig-springfield",
+      "category": "ambiguous",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/weather",
+      "params": {
+        "location": "Springfield"
+      },
+      "auth": "valid",
+      "status": 200,
+      "elapsed_ms": 266.0,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "b4d3f01c2fb108ae1dbde5cd917d34f3;o=1",
+        "date": "Sun, 17 May 2026 22:07:49 GMT",
+        "server": "Google Frontend",
+        "content-length": "89",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "location": "Springfield",
+        "temperature_c": 32.6,
+        "condition": "Partly cloudy",
+        "humidity": 25
+      },
+      "error": null
+    },
+    {
+      "name": "ambig-cambridge",
+      "category": "ambiguous",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/weather",
+      "params": {
+        "location": "Cambridge"
+      },
+      "auth": "valid",
+      "status": 200,
+      "elapsed_ms": 104.5,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "9e9f83910d32a12c1dbde5cd917d3e1b",
+        "date": "Sun, 17 May 2026 22:07:49 GMT",
+        "server": "Google Frontend",
+        "content-length": "200",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "location": "Cambridge",
+        "conditions": [
+          {
+            "temperature_c": 10.2,
+            "condition": "Light rain",
+            "humidity": 82
+          },
+          {
+            "temperature_c": 9.2,
+            "condition": "light rain",
+            "humidity": 95
+          }
+        ],
+        "note": "Multiple conditions reported"
+      },
+      "error": null
+    },
+    {
+      "name": "ambig-boston",
+      "category": "ambiguous",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/weather",
+      "params": {
+        "location": "Boston"
+      },
+      "auth": "valid",
+      "status": 200,
+      "elapsed_ms": 109.3,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "41be3a4714cd868a1dbde5cd917d37d4",
+        "date": "Sun, 17 May 2026 22:07:49 GMT",
+        "server": "Google Frontend",
+        "content-length": "84",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "location": "Boston",
+        "temperature_c": 31.1,
+        "condition": "Partly cloudy",
+        "humidity": 28
+      },
+      "error": null
+    },
+    {
+      "name": "ambig-newcastle",
+      "category": "ambiguous",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/weather",
+      "params": {
+        "location": "Newcastle"
+      },
+      "auth": "valid",
+      "status": 200,
+      "elapsed_ms": 180.6,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "28f1c62438dc398a5e29edbfbfeb0ad2;o=1",
+        "date": "Sun, 17 May 2026 22:08:21 GMT",
+        "server": "Google Frontend",
+        "content-length": "78",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "location": "Newcastle",
+        "temperature_c": 7.6,
+        "condition": "Clear",
+        "humidity": 60
+      },
+      "error": null
+    },
+    {
+      "name": "ambig-athens",
+      "category": "ambiguous",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/weather",
+      "params": {
+        "location": "Athens"
+      },
+      "auth": "valid",
+      "status": 200,
+      "elapsed_ms": 108.4,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "119e4598bb6fa4ab5e29edbfbfeb06e2",
+        "date": "Sun, 17 May 2026 22:08:21 GMT",
+        "server": "Google Frontend",
+        "content-length": "76",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "location": "Athens",
+        "temperature_c": 18.3,
+        "condition": "Clear",
+        "humidity": 60
+      },
+      "error": null
+    },
+    {
+      "name": "ambig-tripoli",
+      "category": "ambiguous",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/weather",
+      "params": {
+        "location": "Tripoli"
+      },
+      "auth": "valid",
+      "status": 200,
+      "elapsed_ms": 115.3,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "744e510e717c64165e29edbfbfeb03ee",
+        "date": "Sun, 17 May 2026 22:08:21 GMT",
+        "server": "Google Frontend",
+        "content-length": "194",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "location": "Tripoli",
+        "conditions": [
+          {
+            "temperature_c": 18.0,
+            "condition": "Clear",
+            "humidity": 74
+          },
+          {
+            "temperature_c": 17.0,
+            "condition": "light rain",
+            "humidity": 87
+          }
+        ],
+        "note": "Multiple conditions reported"
+      },
+      "error": null
+    },
+    {
+      "name": "case-upper",
+      "category": "format",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/weather",
+      "params": {
+        "location": "LONDON"
+      },
+      "auth": "valid",
+      "status": 200,
+      "elapsed_ms": 167.9,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "5976022da42a5fa180e5219b229aa069;o=1",
+        "date": "Sun, 17 May 2026 22:08:54 GMT",
+        "server": "Google Frontend",
+        "content-length": "88",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "location": "London",
+        "temperature_c": 9.2,
+        "condition": "Patchy rain nearby",
+        "humidity": 76
+      },
+      "error": null
+    },
+    {
+      "name": "case-lower",
+      "category": "format",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/weather",
+      "params": {
+        "location": "london"
+      },
+      "auth": "valid",
+      "status": 200,
+      "elapsed_ms": 102.4,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "a67eb92f0db8e35080e5219b229aa9f7",
+        "date": "Sun, 17 May 2026 22:08:54 GMT",
+        "server": "Google Frontend",
+        "content-length": "88",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "location": "London",
+        "temperature_c": 9.2,
+        "condition": "Patchy rain nearby",
+        "humidity": 76
+      },
+      "error": null
+    },
+    {
+      "name": "ws-padded",
+      "category": "format",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/weather",
+      "params": {
+        "location": "  London  "
+      },
+      "auth": "valid",
+      "status": 200,
+      "elapsed_ms": 114.3,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "790c3ae007566e2480e5219b229aa071",
+        "date": "Sun, 17 May 2026 22:08:54 GMT",
+        "server": "Google Frontend",
+        "content-length": "88",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "location": "London",
+        "temperature_c": 9.2,
+        "condition": "Patchy rain nearby",
+        "humidity": 76
+      },
+      "error": null
+    },
+    {
+      "name": "qual-nospace",
+      "category": "format",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/weather",
+      "params": {
+        "location": "London,UK"
+      },
+      "auth": "valid",
+      "status": 200,
+      "elapsed_ms": 332.2,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "9e9d855a19449698a05b84ccbdfacb6c;o=1",
+        "date": "Sun, 17 May 2026 22:09:26 GMT",
+        "server": "Google Frontend",
+        "content-length": "204",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "location": "London",
+        "conditions": [
+          {
+            "temperature_c": 9.2,
+            "condition": "Patchy rain nearby",
+            "humidity": 76
+          },
+          {
+            "temperature_c": 8.2,
+            "condition": "light rain",
+            "humidity": 89
+          }
+        ],
+        "note": "Multiple conditions reported"
+      },
+      "error": null
+    },
+    {
+      "name": "qual-space",
+      "category": "format",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/weather",
+      "params": {
+        "location": "London, UK"
+      },
+      "auth": "valid",
+      "status": 200,
+      "elapsed_ms": 164.2,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "4ac48649fd2d4ca9a05b84ccbdfac668",
+        "date": "Sun, 17 May 2026 22:09:26 GMT",
+        "server": "Google Frontend",
+        "content-length": "204",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "location": "London",
+        "conditions": [
+          {
+            "temperature_c": 9.2,
+            "condition": "Patchy rain nearby",
+            "humidity": 76
+          },
+          {
+            "temperature_c": 8.2,
+            "condition": "light rain",
+            "humidity": 89
+          }
+        ],
+        "note": "Multiple conditions reported"
+      },
+      "error": null
+    },
+    {
+      "name": "qual-disambig",
+      "category": "format",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/weather",
+      "params": {
+        "location": "London, Ontario"
+      },
+      "auth": "valid",
+      "status": 200,
+      "elapsed_ms": 111.9,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "d854542e40530a48a05b84ccbdfacc60",
+        "date": "Sun, 17 May 2026 22:09:26 GMT",
+        "server": "Google Frontend",
+        "content-length": "84",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "location": "London",
+        "temperature_c": 25.1,
+        "condition": "Partly cloudy",
+        "humidity": 57
+      },
+      "error": null
+    },
+    {
+      "name": "repeated-param",
+      "category": "format",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/weather",
+      "params": {
+        "location": [
+          "London",
+          "Tokyo"
+        ]
+      },
+      "auth": "valid",
+      "status": 200,
+      "elapsed_ms": 258.0,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "7e7ac0e9cd56113579a98121d635d877;o=1",
+        "date": "Sun, 17 May 2026 22:09:59 GMT",
+        "server": "Google Frontend",
+        "content-length": "75",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "location": "Tokyo",
+        "temperature_c": 20.1,
+        "condition": "Sunny",
+        "humidity": 83
+      },
+      "error": null
+    },
+    {
+      "name": "adv-empty",
+      "category": "adversarial",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/weather",
+      "params": {
+        "location": ""
+      },
+      "auth": "valid",
+      "status": 404,
+      "elapsed_ms": 130.2,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "ca02cad8bca4a00179a98121d635dcce",
+        "date": "Sun, 17 May 2026 22:09:59 GMT",
+        "server": "Google Frontend",
+        "content-length": "35",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "error": "Location \"\" not found"
+      },
+      "error": null
+    },
+    {
+      "name": "adv-no-param",
+      "category": "adversarial",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/weather",
+      "params": null,
+      "auth": "valid",
+      "status": 422,
+      "elapsed_ms": 25.5,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "cbfabc8de079af5a79a98121d635d57c",
+        "date": "Sun, 17 May 2026 22:09:59 GMT",
+        "server": "Google Frontend",
+        "content-length": "94",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "detail": [
+          {
+            "type": "missing",
+            "loc": [
+              "query",
+              "location"
+            ],
+            "msg": "Field required",
+            "input": null
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "name": "adv-wrong-paramname",
+      "category": "adversarial",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/weather",
+      "params": {
+        "city": "London"
+      },
+      "auth": "valid",
+      "status": 422,
+      "elapsed_ms": 1148.9,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "9bd15076d9bb9f17b60d88001e163335;o=1",
+        "date": "Sun, 17 May 2026 22:10:32 GMT",
+        "server": "Google Frontend",
+        "content-length": "94",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "detail": [
+          {
+            "type": "missing",
+            "loc": [
+              "query",
+              "location"
+            ],
+            "msg": "Field required",
+            "input": null
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "name": "adv-long-1000",
+      "category": "adversarial",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/weather",
+      "params": {
+        "location": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "auth": "valid",
+      "status": 404,
+      "elapsed_ms": 155.0,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "e287fa5a6902975ab60d88001e1630fb",
+        "date": "Sun, 17 May 2026 22:10:32 GMT",
+        "server": "Google Frontend",
+        "content-length": "1035",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "error": "Location \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\" not found"
+      },
+      "error": null
+    },
+    {
+      "name": "adv-unicode-jp",
+      "category": "adversarial",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/weather",
+      "params": {
+        "location": "東京"
+      },
+      "auth": "valid",
+      "status": 200,
+      "elapsed_ms": 110.2,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "b1def4cc34ce3d43b60d88001e163b66",
+        "date": "Sun, 17 May 2026 22:10:32 GMT",
+        "server": "Google Frontend",
+        "content-length": "79",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "location": "東京都",
+        "temperature_c": 20.1,
+        "condition": "Sunny",
+        "humidity": 83
+      },
+      "error": null
+    },
+    {
+      "name": "adv-unicode-ru",
+      "category": "adversarial",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/weather",
+      "params": {
+        "location": "Москва"
+      },
+      "auth": "valid",
+      "status": 200,
+      "elapsed_ms": 263.9,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "b8c9e38ff17460e766dd524d15c4a9ec;o=1",
+        "date": "Sun, 17 May 2026 22:11:04 GMT",
+        "server": "Google Frontend",
+        "content-length": "230",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "location": "Москва",
+        "conditions": [
+          {
+            "temperature_c": 17.3,
+            "condition": "Moderate or heavy rain with thunder",
+            "humidity": 94
+          },
+          {
+            "temperature_c": 16.3,
+            "condition": "light rain",
+            "humidity": 100
+          }
+        ],
+        "note": "Multiple conditions reported"
+      },
+      "error": null
+    },
+    {
+      "name": "adv-unicode-pt",
+      "category": "adversarial",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/weather",
+      "params": {
+        "location": "São Paulo"
+      },
+      "auth": "valid",
+      "status": 200,
+      "elapsed_ms": 110.7,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "a0c6f63f978766ba66dd524d15c4abe5",
+        "date": "Sun, 17 May 2026 22:11:05 GMT",
+        "server": "Google Frontend",
+        "content-length": "209",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "location": "Sao Paulo",
+        "conditions": [
+          {
+            "temperature_c": 18.1,
+            "condition": "Light rain shower",
+            "humidity": 94
+          },
+          {
+            "temperature_c": 17.1,
+            "condition": "light rain",
+            "humidity": 100
+          }
+        ],
+        "note": "Multiple conditions reported"
+      },
+      "error": null
+    },
+    {
+      "name": "adv-emoji",
+      "category": "adversarial",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/weather",
+      "params": {
+        "location": "🗼"
+      },
+      "auth": "valid",
+      "status": 404,
+      "elapsed_ms": 124.5,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "eccf97be8bdc28d766dd524d15c4acff",
+        "date": "Sun, 17 May 2026 22:11:05 GMT",
+        "server": "Google Frontend",
+        "content-length": "39",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "error": "Location \"🗼\" not found"
+      },
+      "error": null
+    },
+    {
+      "name": "adv-numeric",
+      "category": "adversarial",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/weather",
+      "params": {
+        "location": "12345"
+      },
+      "auth": "valid",
+      "status": 200,
+      "elapsed_ms": 230.3,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "4c89e470871c40ff0af50202d812f4af;o=1",
+        "date": "Sun, 17 May 2026 22:11:37 GMT",
+        "server": "Google Frontend",
+        "content-length": "81",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "location": "Schenectady",
+        "temperature_c": 30.3,
+        "condition": "Sunny",
+        "humidity": 33
+      },
+      "error": null
+    },
+    {
+      "name": "adv-coords",
+      "category": "adversarial",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/weather",
+      "params": {
+        "location": "51.5074,-0.1278"
+      },
+      "auth": "valid",
+      "status": 200,
+      "elapsed_ms": 98.7,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "f6ccacfbf68a3f6c0af50202d812ffec",
+        "date": "Sun, 17 May 2026 22:11:37 GMT",
+        "server": "Google Frontend",
+        "content-length": "88",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "location": "Strand",
+        "temperature_c": 9.2,
+        "condition": "Patchy rain nearby",
+        "humidity": 76
+      },
+      "error": null
+    },
+    {
+      "name": "adv-sql",
+      "category": "adversarial",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/weather",
+      "params": {
+        "location": "London'; DROP TABLE cities;--"
+      },
+      "auth": "valid",
+      "status": 200,
+      "elapsed_ms": 106.3,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "c88c44d021d9d96fb26442d62cd0e658",
+        "date": "Sun, 17 May 2026 22:11:37 GMT",
+        "server": "Google Frontend",
+        "content-length": "79",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "location": "Tiar Drop",
+        "temperature_c": 21.5,
+        "condition": "Clear",
+        "humidity": 67
+      },
+      "error": null
+    },
+    {
+      "name": "adv-xss",
+      "category": "adversarial",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/weather",
+      "params": {
+        "location": "<script>alert(1)</script>"
+      },
+      "auth": "valid",
+      "status": 200,
+      "elapsed_ms": 171.1,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "4b885e52a8351331d2fb10998efba434;o=1",
+        "date": "Sun, 17 May 2026 22:12:09 GMT",
+        "server": "Google Frontend",
+        "content-length": "83",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "location": "Alert",
+        "temperature_c": -8.8,
+        "condition": "Partly Cloudy",
+        "humidity": 92
+      },
+      "error": null
+    },
+    {
+      "name": "adv-atlantis",
+      "category": "adversarial",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/weather",
+      "params": {
+        "location": "Atlantis"
+      },
+      "auth": "valid",
+      "status": 200,
+      "elapsed_ms": 104.3,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "a09d3425ccfcc784d2fb10998efba371",
+        "date": "Sun, 17 May 2026 22:12:09 GMT",
+        "server": "Google Frontend",
+        "content-length": "86",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "location": "Atlantis",
+        "temperature_c": 18.1,
+        "condition": "Partly Cloudy",
+        "humidity": 73
+      },
+      "error": null
+    },
+    {
+      "name": "adv-hogwarts",
+      "category": "adversarial",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/weather",
+      "params": {
+        "location": "Hogwarts"
+      },
+      "auth": "valid",
+      "status": 200,
+      "elapsed_ms": 157.0,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "994f99aa6a361935d2fb10998efbaa29",
+        "date": "Sun, 17 May 2026 22:12:10 GMT",
+        "server": "Google Frontend",
+        "content-length": "78",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "location": "Hogwarts",
+        "temperature_c": 36.3,
+        "condition": "Clear",
+        "humidity": 12
+      },
+      "error": null
+    },
+    {
+      "name": "adv-gibberish",
+      "category": "adversarial",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/weather",
+      "params": {
+        "location": "Asdfjklqwerty"
+      },
+      "auth": "valid",
+      "status": 404,
+      "elapsed_ms": 223.6,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "e0a0a05bb5412f753466eb719536fa84;o=1",
+        "date": "Sun, 17 May 2026 22:12:42 GMT",
+        "server": "Google Frontend",
+        "content-length": "48",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "error": "Location \"Asdfjklqwerty\" not found"
+      },
+      "error": null
+    },
+    {
+      "name": "adv-postcode",
+      "category": "adversarial",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/weather",
+      "params": {
+        "location": "SW1A 1AA"
+      },
+      "auth": "valid",
+      "status": 200,
+      "elapsed_ms": 109.1,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "9ec986b09ccf49973466eb719536f4b7",
+        "date": "Sun, 17 May 2026 22:12:42 GMT",
+        "server": "Google Frontend",
+        "content-length": "204",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "location": "London",
+        "conditions": [
+          {
+            "temperature_c": 9.2,
+            "condition": "Patchy rain nearby",
+            "humidity": 76
+          },
+          {
+            "temperature_c": 8.2,
+            "condition": "light rain",
+            "humidity": 89
+          }
+        ],
+        "note": "Multiple conditions reported"
+      },
+      "error": null
+    },
+    {
+      "name": "adv-airport",
+      "category": "adversarial",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/weather",
+      "params": {
+        "location": "LHR"
+      },
+      "auth": "valid",
+      "status": 200,
+      "elapsed_ms": 106.2,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "29454ec93c90b4a33466eb719536f380",
+        "date": "Sun, 17 May 2026 22:12:42 GMT",
+        "server": "Google Frontend",
+        "content-length": "106",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "location": "London Heathrow Airport",
+        "temperature_c": 10.1,
+        "condition": "Patchy rain nearby",
+        "humidity": 71
+      },
+      "error": null
+    },
+    {
+      "name": "adv-country",
+      "category": "adversarial",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/weather",
+      "params": {
+        "location": "France"
+      },
+      "auth": "valid",
+      "status": 200,
+      "elapsed_ms": 284.7,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "8eb2ed9a60cc8bf1c016d268278ac35e;o=1",
+        "date": "Sun, 17 May 2026 22:13:14 GMT",
+        "server": "Google Frontend",
+        "content-length": "83",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "location": "Paris",
+        "temperature_c": 11.3,
+        "condition": "Moderate rain",
+        "humidity": 94
+      },
+      "error": null
+    },
+    {
+      "name": "adv-continent",
+      "category": "adversarial",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/weather",
+      "params": {
+        "location": "Europe"
+      },
+      "auth": "valid",
+      "status": 200,
+      "elapsed_ms": 105.3,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "8f653004587ddf19c016d268278acb2b",
+        "date": "Sun, 17 May 2026 22:13:14 GMT",
+        "server": "Google Frontend",
+        "content-length": "75",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "location": "Europe",
+        "temperature_c": 16.5,
+        "condition": "Mist",
+        "humidity": 94
+      },
+      "error": null
+    },
+    {
+      "name": "adv-comma-cities",
+      "category": "adversarial",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/weather",
+      "params": {
+        "location": "London,Tokyo"
+      },
+      "auth": "valid",
+      "status": 200,
+      "elapsed_ms": 102.9,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "b9753a82d4bd48d9c016d268278ac353",
+        "date": "Sun, 17 May 2026 22:13:15 GMT",
+        "server": "Google Frontend",
+        "content-length": "75",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "location": "Tokyo",
+        "temperature_c": 20.1,
+        "condition": "Sunny",
+        "humidity": 83
+      },
+      "error": null
+    },
+    {
+      "name": "adv-newline",
+      "category": "adversarial",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/weather",
+      "params": {
+        "location": "London\nTokyo"
+      },
+      "auth": "valid",
+      "status": 200,
+      "elapsed_ms": 289.5,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "9436c30865347f867eac72ec969566b7;o=1",
+        "date": "Sun, 17 May 2026 22:13:47 GMT",
+        "server": "Google Frontend",
+        "content-length": "75",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "location": "Tokyo",
+        "temperature_c": 20.1,
+        "condition": "Sunny",
+        "humidity": 83
+      },
+      "error": null
+    },
+    {
+      "name": "auth-no-key",
+      "category": "auth",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/weather",
+      "params": {
+        "location": "London"
+      },
+      "auth": "missing",
+      "status": 401,
+      "elapsed_ms": 18.0,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "e13c2d57c328fa8e7eac72ec96956893",
+        "date": "Sun, 17 May 2026 22:13:47 GMT",
+        "server": "Google Frontend",
+        "content-length": "38",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "error": "Invalid or missing API key"
+      },
+      "error": null
+    },
+    {
+      "name": "auth-wrong-key",
+      "category": "auth",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/weather",
+      "params": {
+        "location": "London"
+      },
+      "auth": "wrong",
+      "status": 401,
+      "elapsed_ms": 15.9,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "0257c6e387e6439a7eac72ec9695691b",
+        "date": "Sun, 17 May 2026 22:13:47 GMT",
+        "server": "Google Frontend",
+        "content-length": "38",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "error": "Invalid or missing API key"
+      },
+      "error": null
+    },
+    {
+      "name": "method-post",
+      "category": "method",
+      "method": "POST",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/weather",
+      "params": {
+        "location": "London"
+      },
+      "auth": "valid",
+      "status": 405,
+      "elapsed_ms": 216.6,
+      "response_headers": {
+        "allow": "GET",
+        "content-type": "application/json",
+        "x-cloud-trace-context": "7067cf9cd422063574a5ca6bef386786;o=1",
+        "date": "Sun, 17 May 2026 22:14:19 GMT",
+        "server": "Google Frontend",
+        "content-length": "31",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "detail": "Method Not Allowed"
+      },
+      "error": null
+    },
+    {
+      "name": "determ-london-2",
+      "category": "determinism",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/weather",
+      "params": {
+        "location": "London"
+      },
+      "auth": "valid",
+      "status": 200,
+      "elapsed_ms": 106.4,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "728d35b4b1e913e974a5ca6bef386407",
+        "date": "Sun, 17 May 2026 22:14:19 GMT",
+        "server": "Google Frontend",
+        "content-length": "88",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "location": "London",
+        "temperature_c": 9.4,
+        "condition": "Patchy rain nearby",
+        "humidity": 76
+      },
+      "error": null
+    },
+    {
+      "name": "burst-1",
+      "category": "ratelimit",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/weather",
+      "params": {
+        "location": "London"
+      },
+      "auth": "valid",
+      "status": 200,
+      "elapsed_ms": 2336.8,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "b9077c976a90cd3ab258c2999354eab0;o=1",
+        "date": "Sun, 17 May 2026 22:14:54 GMT",
+        "server": "Google Frontend",
+        "content-length": "88",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "location": "London",
+        "temperature_c": 9.4,
+        "condition": "Patchy rain nearby",
+        "humidity": 76
+      },
+      "error": null
+    },
+    {
+      "name": "burst-2",
+      "category": "ratelimit",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/weather",
+      "params": {
+        "location": "London"
+      },
+      "auth": "valid",
+      "status": 200,
+      "elapsed_ms": 95.2,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "f7411b82fee0cfb4b258c2999354e89f",
+        "date": "Sun, 17 May 2026 22:14:54 GMT",
+        "server": "Google Frontend",
+        "content-length": "88",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "location": "London",
+        "temperature_c": 9.4,
+        "condition": "Patchy rain nearby",
+        "humidity": 76
+      },
+      "error": null
+    },
+    {
+      "name": "burst-3",
+      "category": "ratelimit",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/weather",
+      "params": {
+        "location": "London"
+      },
+      "auth": "valid",
+      "status": 200,
+      "elapsed_ms": 100.4,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "708b4e9c64404e1ab258c2999354eae2",
+        "date": "Sun, 17 May 2026 22:14:54 GMT",
+        "server": "Google Frontend",
+        "content-length": "88",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "location": "London",
+        "temperature_c": 9.4,
+        "condition": "Patchy rain nearby",
+        "humidity": 76
+      },
+      "error": null
+    },
+    {
+      "name": "burst-4",
+      "category": "ratelimit",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/weather",
+      "params": {
+        "location": "London"
+      },
+      "auth": "valid",
+      "status": 200,
+      "elapsed_ms": 111.0,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "7330713721a53505b258c2999354e00b",
+        "date": "Sun, 17 May 2026 22:14:54 GMT",
+        "server": "Google Frontend",
+        "content-length": "88",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "location": "London",
+        "temperature_c": 9.4,
+        "condition": "Patchy rain nearby",
+        "humidity": 76
+      },
+      "error": null
+    },
+    {
+      "name": "burst-5",
+      "category": "ratelimit",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/weather",
+      "params": {
+        "location": "London"
+      },
+      "auth": "valid",
+      "status": 200,
+      "elapsed_ms": 192.5,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "208814bd76392f34b258c2999354eeb1",
+        "date": "Sun, 17 May 2026 22:14:54 GMT",
+        "server": "Google Frontend",
+        "content-length": "88",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "location": "London",
+        "temperature_c": 9.4,
+        "condition": "Patchy rain nearby",
+        "humidity": 76
+      },
+      "error": null
+    },
+    {
+      "name": "burst-6",
+      "category": "ratelimit",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/weather",
+      "params": {
+        "location": "London"
+      },
+      "auth": "valid",
+      "status": 200,
+      "elapsed_ms": 18.4,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "b4db77ca5adea26db258c2999354ed4d",
+        "date": "Sun, 17 May 2026 22:14:54 GMT",
+        "server": "Google Frontend",
+        "content-length": "105",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "status": "throttled",
+        "message": "Rate limit exceeded. Please wait.",
+        "retry_after_seconds": 29,
+        "data": null
+      },
+      "error": null
+    },
+    {
+      "name": "burst-recovery",
+      "category": "ratelimit-recovery",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/weather",
+      "params": {
+        "location": "London"
+      },
+      "auth": "valid",
+      "status": 200,
+      "elapsed_ms": 248.0,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "d7b8f222b9b1ed9703721f4280812acc;o=1",
+        "date": "Sun, 17 May 2026 22:15:29 GMT",
+        "server": "Google Frontend",
+        "content-length": "88",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "location": "London",
+        "temperature_c": 9.4,
+        "condition": "Patchy rain nearby",
+        "humidity": 76
+      },
+      "error": null
+    },
+    {
+      "name": "determ-london-3",
+      "category": "determinism",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/weather",
+      "params": {
+        "location": "London"
+      },
+      "auth": "valid",
+      "status": 200,
+      "elapsed_ms": 99.7,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "67188e38aa48f00a03721f4280812bba",
+        "date": "Sun, 17 May 2026 22:15:29 GMT",
+        "server": "Google Frontend",
+        "content-length": "88",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "location": "London",
+        "temperature_c": 9.4,
+        "condition": "Patchy rain nearby",
+        "humidity": 76
+      },
+      "error": null
+    }
+  ],
+  "summary": {
+    "total": 49,
+    "by_status": {
+      "200": 40,
+      "404": 4,
+      "422": 2,
+      "401": 2,
+      "405": 1
+    },
+    "client_errors": 0,
+    "london_responses_identical": false,
+    "rate_limit_burst": {
+      "responses": [
+        {
+          "name": "burst-1",
+          "status": 200,
+          "elapsed_ms": 2336.8
+        },
+        {
+          "name": "burst-2",
+          "status": 200,
+          "elapsed_ms": 95.2
+        },
+        {
+          "name": "burst-3",
+          "status": 200,
+          "elapsed_ms": 100.4
+        },
+        {
+          "name": "burst-4",
+          "status": 200,
+          "elapsed_ms": 111.0
+        },
+        {
+          "name": "burst-5",
+          "status": 200,
+          "elapsed_ms": 192.5
+        },
+        {
+          "name": "burst-6",
+          "status": 200,
+          "elapsed_ms": 18.4
+        }
+      ],
+      "first_429_at_request_index": null,
+      "retry_after_header": null,
+      "rate_limit_headers": {},
+      "recovery_confirmed": true,
+      "recovery_elapsed_ms": 248.0
+    }
+  }
+}

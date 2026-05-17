@@ -2,10 +2,13 @@ import asyncio
 import os
 import signal
 import sys
+import json
 
+import httpx
 from rich.console import Console, Group
 from rich.live import Live
 from rich.markdown import Markdown
+from rich.spinner import Spinner
 from anthropic import AsyncAnthropic
 from dotenv import load_dotenv
 
@@ -16,6 +19,49 @@ MAX_TOKENS = 1024
 console = Console()
 
 client = AsyncAnthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
+
+ELYOS_BASE = "https://elyos-interview-907656039105.europe-west2.run.app"
+ELYOS_API_KEY = os.environ["ELYOS_API_KEY"]
+
+TOOLS = [
+    {
+        "name": "get_weather",
+        "description": (
+            "Get current weather for a city. "
+            "Expects a city name, optionally with a country or region qualifier "
+            "(e.g. 'London', 'London, UK', 'Springfield, IL'). "
+            "The underlying geocoder is fuzzy and will silently return the wrong "
+            "place for coordinates, ZIP/postal codes, ISO country codes (e.g. 'GB'), "
+            "airport codes, or vague inputs — for any of those, ASK the user to "
+            "clarify which city they mean instead of calling this tool. "
+            "If the returned location field doesn't match what the user asked for, "
+            "mention the ambiguity in your reply rather than presenting it as the "
+            "answer. "
+            "Responses sometimes contain a 'conditions' array with multiple "
+            "readings instead of a single reading. When that happens, you MUST "
+            "make the multiplicity explicit — e.g. 'Manchester (2 readings: "
+            "9.1°C overcast, 8.1°C light rain)'. Never combine them with a "
+            "slash like '9.1°C / 8.1°C', and never average or range them. The "
+            "semantics of multi-reading responses aren't documented, so the "
+            "user needs to see them as distinct data points."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "location": {
+                    "type": "string",
+                    "description": (
+                        "City name, optionally with a country/region qualifier — "
+                        "e.g. 'London', 'London, UK', 'Springfield, IL'. "
+                        "Do not pass coordinates, ZIP codes, country codes, or "
+                        "airport codes."
+                    ),
+                },
+            },
+            "required": ["location"],
+        },
+    },
+]
 
 async def get_user_input() -> str:
     """Get input from user."""
@@ -45,30 +91,67 @@ async def call_llm(user_input: str, conversation_history: list):
         async with client.messages.stream(
             model=MODEL,
             max_tokens=MAX_TOKENS,
+            tools=TOOLS,
             messages=conversation_history,
         ) as stream:
             async for text in stream.text_stream:
                 yield text
             final = await stream.get_final_message()
 
+        if final.stop_reason != "tool_use":
+            conversation_history.append({"role": "assistant", "content": final.content})
+            return
+        
+        tool_results = []
+        for block in final.content:
+            if block.type != "tool_use":
+                continue
+            yield ("status", TOOL_STATUS[block.name](block.input))
+            result = await TOOL_FUNCS[block.name](**block.input)
+            attempt = 0
+            while (isinstance(result, dict)
+                   and result.get("error") == "rate limited"
+                   and attempt < 2):
+                wait = int(result.get("retry_after_seconds", 30)) + 1
+                yield ("status", f"Waiting for all results... (CTRL+C to cancel)")
+                await asyncio.sleep(wait)
+                yield ("status", TOOL_STATUS[block.name](block.input))
+                result = await TOOL_FUNCS[block.name](**block.input)
+                attempt += 1
+            yield ("clear_status",)
+            tool_results.append({
+                "type": "tool_result",
+                "tool_use_id": block.id,
+                "content": json.dumps(result),
+                "is_error": isinstance(result, dict) and "error" in result,
+            })
         conversation_history.append({"role": "assistant", "content": final.content})
-        return
+        conversation_history.append({"role": "user", "content": tool_results})
+
 
 async def stream_response(user_input: str, conversation_history: list):
     chunks: list[str] = []
+    status_text: str | None = None
     try:
-        # Live re-renders the chunks list as markdown
+        # Live re-renders the chunks list as markdown; a Spinner overlay
+        # appears alongside while a "status" event is active.
         with Live(console=console, refresh_per_second=15) as live:
             def render():
                 parts = []
                 text = "".join(chunks)
                 if text:
                     parts.append(Markdown(text))
+                if status_text is not None:
+                    parts.append(Spinner("dots", text=status_text, style="yellow"))
                 return Group(*parts)
 
             async for event in call_llm(user_input, conversation_history):
                 if isinstance(event, str):
                     chunks.append(event)
+                elif event[0] == "status":
+                    status_text = event[1]
+                elif event[0] == "clear_status":
+                    status_text = None
                 live.update(render())
         print()
     except asyncio.CancelledError:
@@ -86,13 +169,34 @@ async def stream_response(user_input: str, conversation_history: list):
         raise
 
 async def get_weather(location: str) -> dict:
-    """Fetch weather from API (~200ms)."""
-    pass
-
+    """Fetch weather from API (~200ms typical)."""
+    try:
+        async with httpx.AsyncClient(timeout=10) as http:
+            r = await http.get(
+                f"{ELYOS_BASE}/weather",
+                params={"location": location},
+                headers={"X-API-Key": ELYOS_API_KEY},
+            )
+        body = r.json()
+    except Exception as e:
+        return {"error": f"weather API failed: {type(e).__name__}"}
+    # Throttle hits come back HTTP 200 with envelope — see docs/api-notes.md.
+    if isinstance(body, dict) and body.get("status") == "throttled":
+        return {
+            "error": "rate limited",
+            "retry_after_seconds": body.get("retry_after_seconds", 30),
+        }
+    return body
 
 async def research_topic(topic: str) -> dict:
     """Research a topic (3-8 seconds). Should be cancellable."""
     pass
+
+TOOL_FUNCS = {"get_weather": get_weather}
+
+TOOL_STATUS = {
+    "get_weather": lambda args: f"Looking up weather in {args.get('location', '?')}...",
+}
 
 async def main():
     # asyncio.run's SIGINT handler counts cumulative Ctrl+Cs and raises

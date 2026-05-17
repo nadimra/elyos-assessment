@@ -1,0 +1,1122 @@
+╭─── Claude Code v2.1.143 ─────────────────────────────────────────────────────╮
+│                                                    │ Tips for getting        │
+│                  Welcome back nad!                 │ started                 │
+│                                                    │ Run /init to create a … │
+│                      ▗ ▗   ▖ ▖                     │ ─────────────────────── │
+│                                                    │ What's new              │
+│                        ▘▘ ▝▝                       │ Added plugin dependenc… │
+│ Opus 4.7 · Claude Max · nadimrahman98@gmail.com's  │ Added projected contex… │
+│ Organization                                       │ Added `worktree.bgIsol… │
+│               ~/src/elyos-assessment               │ /release-notes for more │
+╰──────────────────────────────────────────────────────────────────────────────╯
+
+❯ I want to probe get_weather api. An example call is curl -H "X-API-Key:       
+  <provided>" \                                                                 
+    "https://elyos-interview-907656039105.europe-west2.run.app/weather?location 
+  =London". The documentation says states the following: /weather    GET        
+  location (string)    Weather data for the location. Our task is the observe   
+  any behaviours with this api and find any issues with it. Explore the happy   
+  path, but list out quarks. Can you implement probe_weather.py which           
+  systematically tests the api with different inputs to find possible issues.   
+  Be exaustive. eg. test invalid countries, multiple countries, long            
+  characters, no text, weird situations where 2 places have the same name, etc  
+  etc. One thing I've noticed is that there is rate limiting for this endpoint, 
+   so we cannot call so many at once (I think at most 4 times, until we have to 
+   wait 30 seconds for it to be fine again). Ensure to test all the scenarios,  
+  including the rate limiting                                                   
+
+  Read 3 files, listed 3 directories (ctrl+o to expand)
+
+⏺ I have enough context. The codebase is a small async chat skeleton; probes/ is
+   empty and the API key is in .env as ELYOS_API_KEY. Let me ask a few targeted
+  questions before writing the plan.
+
+⏺ User answered Claude's questions:
+  ⎿  · How should the probe pace itself around the ~4-request / 30s rate limit? 
+     → Safe cadence + 1 deliberate burst (Recommended)
+     · Output format for probe results? → JSON file only, minimal console
+     · HTTP client? → I dont want to implement it in the main chat application 
+     yet, i just want to test this endpoint out
+     · Scope — which probe categories should be in v1? → Happy path (London, 
+     Tokyo, New York), Ambiguous / duplicate place names, Case, whitespace, 
+     punctuation, encoding, Adversarial / quirky inputs
+
+⏺ Bash(/Users/nad/src/elyos-assessment/.venv/bin/python -c "import httpx;
+      print(httpx.__version__)" 2>&1)
+  ⎿  0.28.1
+
+⏺ Good — httpx is already available as a transitive dependency of anthropic, so
+  no new package needed. Writing the plan now.
+
+⏺ Updated plan
+  ⎿  /plan to preview
+
+⏺ User approved Claude's plan
+  ⎿  Plan saved to: ~/.claude/plans/i-want-to-probe-happy-fog.md · /plan to edit
+     Plan: probes/probe_weather.py
+
+     Context
+
+     The chat app (main.py) is being built against two undocumented-quirk APIs.
+     Before wiring /weather into the LLM tool loop, we want a standalone probe
+     that systematically maps the endpoint's real behaviour — happy path, name
+     disambiguation, input parsing, adversarial inputs, auth, and the rate
+     limiter (~4 req / 30 s observed).
+
+     The findings will be folded into docs/api-notes.md afterwards and will
+     shape the error handling we add to get_weather() in main.py. This plan
+     covers only the probe; it does not touch main.py.
+
+     File to create
+
+     - probes/probe_weather.py — single standalone Python script.
+
+     No changes to main.py, requirements.txt, or anything else.
+     httpx is already installed transitively via anthropic (verified:
+     0.28.1 in .venv), so no new dependency.
+
+     Approach
+
+     Single sync script (httpx.Client) — rate limiting makes async pointless
+     and a linear top-to-bottom script is easiest to debug.
+
+     Structure:
+
+     1. Load ELYOS_API_KEY from .env via python-dotenv.
+     2. Define BASE_URL and a small probe(name, params, *, method="GET", 
+     headers=None) helper that records: name, request URL/params, status,
+     elapsed ms, response headers, parsed JSON (or raw text on parse fail),
+     and any exception.
+     3. Group probes into ordered "batches" of 3 calls each, then sleep(32)
+     between batches — one head-room request below the observed 4-call
+     limit, and 2 s above the 30 s recovery window.
+     4. One dedicated burst batch that intentionally fires 6 rapid requests
+     to capture the limiter's status code, Retry-After / X-RateLimit-*
+     headers, and body. Then sleeps 35 s and re-fires one request to confirm
+     recovery.
+     5. Write everything to probes/probe_weather_results.json (full
+     request/response detail). Console output is minimal: one line per
+     probe ([ok|FAIL|429] case-name (123ms)) and a final summary.
+
+     Probe catalogue (~45 cases, ordered safest → riskiest)
+
+     Happy path (baseline shape + latency)
+     - London, Tokyo, New York
+
+     Ambiguous / duplicate names (which one wins?)
+     - Springfield, Cambridge, Boston, Newcastle, Athens, Tripoli
+
+     Case / whitespace / punctuation / encoding
+     - LONDON (upper)
+     - london (lower)
+     -  London  (padded — does it strip?)
+     - London,UK (no space qualifier)
+     - London, UK (space qualifier)
+     - London, Ontario (force disambiguation away from default)
+     - ?location=London&location=Tokyo (repeated param — which wins?)
+
+     Adversarial / quirky inputs
+     - "" empty string
+     - omit location param entirely
+     - different param name (?city=London)
+     - 1000-char string ("a" * 1000)
+     - Unicode native: 東京, Москва, São Paulo
+     - emoji: 🗼
+     - numeric: 12345
+     - coordinates: 51.5074,-0.1278
+     - SQL-ish: London'; DROP TABLE cities;--
+     - HTML/XSS-ish: <script>alert(1)</script>
+     - fictional: Atlantis, Hogwarts, Asdfjklqwerty
+     - postal code: SW1A 1AA
+     - airport code: LHR
+     - country only: France
+     - continent: Europe
+     - comma-joined cities: London,Tokyo
+     - newline injection: London\nTokyo
+
+     Auth / method
+     - missing X-API-Key header
+     - wrong X-API-Key value
+     - POST /weather?location=London (wrong method)
+
+     Determinism (response stable across calls?)
+     - call London 3× spread across different batches, diff JSON bodies in
+     the post-run summary
+
+     Rate-limit burst (dedicated batch, run LAST so prior probes aren't
+     contaminated by an active limiter)
+     - 6 rapid London calls back-to-back, capture every status + headers
+     - sleep(35)
+     - 1 final London call to confirm recovery + measure post-recovery latency
+
+     Pacing math
+
+     ~45 normal probes ÷ 3 per batch = 15 batches × 32 s ≈ 8 min, plus
+     burst+recovery ≈ +40 s. Total run ≈ 9 minutes. Acceptable for a
+     one-shot exploration.
+
+     Output schema (probes/probe_weather_results.json)
+
+     {
+       "run_started_at": "2026-05-17T...",
+       "base_url": "https://elyos-interview-907656039105.europe-west2.run.app",
+       "probes": [
+         {
+           "name": "happy-london",
+           "category": "happy",
+           "method": "GET",
+           "url": ".../weather",
+           "params": {"location": "London"},
+           "status": 200,
+           "elapsed_ms": 187,
+           "response_headers": {...},
+           "response_body": {...},
+           "error": null
+         }
+       ],
+       "summary": {
+         "total": 45,
+         "by_status": {"200": 38, "400": 4, "429": 7, "...": ...},
+         "london_responses_identical": true,
+         "rate_limit_burst": {
+           "responses": [{"status": 200, "elapsed_ms": 145}, ...],
+           "first_429_at_request_index": 4,
+           "retry_after_header": "30",
+           "recovery_confirmed": true
+         }
+       }
+     }
+
+     Critical files
+
+     - Create: probes/probe_weather.py
+     - Create (output): probes/probe_weather_results.json (gitignored if
+     desired — .gitignore currently only ignores .env; mention to user
+     but don't change without ask)
+     - Read at startup: .env for ELYOS_API_KEY
+
+     Reused utilities
+
+     Minimal — this is a standalone script. The only reuse is:
+
+     - dotenv.load_dotenv() (already used in main.py:12) for loading
+     ELYOS_API_KEY.
+     - httpx (already in .venv via anthropic's transitive dep).
+
+     No imports from main.py — keeps the probe runnable even if the chat
+     app is broken.
+
+     Verification
+
+     End-to-end check:
+
+     1. source .venv/bin/activate && python probes/probe_weather.py
+     2. Watch console: each line should appear with status + latency; long
+     sleep(32) gaps are expected between batches.
+     3. After ~9 minutes, confirm probes/probe_weather_results.json exists
+     and contains all probes.
+     4. Sanity-check the summary block: happy-path probes all 200, at
+     least one 429 recorded in the burst block, recovery_confirmed: true.
+     5. Spot-check 2–3 interesting probes manually (ambiguous names,
+     empty-string, missing-key) by reading the JSON.
+
+     Once verified, the discovered quirks get summarised into
+     docs/api-notes.md in a follow-up turn — out of scope for this plan.
+
+⏺ Plan approved. Writing the probe script.
+
+⏺ Write(probes/probe_weather.py)
+  ⎿  Wrote 293 lines to probes/probe_weather.py
+       2 """Systematic probe of the /weather endpoint.
+       3 Runs ~45 cases across happy path, name disambiguation, formattin
+       4 adversarial inputs, auth/method, determinism, and a deliberate
+       5 rate-limit burst. Writes full request/response detail to
+       6 probes/probe_weather_results.json.
+       8 Pacing: 3 requests per ~32s window (the observed limit is ~4 / 3
+         0s, so
+         oreshead-room request below). The burst section deliberately ign
+      10 pacing to map the limiter's behaviour, then sleeps 35s before re
+         suming.
+     … +328 lines (ctrl+o to expand)
+
+⏺ Script written. Syntax-check and then run the probe.
+
+⏺ Bash(/Users/nad/src/elyos-assessment/.venv/bin/python -m py_compile
+      /Users/nad/src/elyos-assessment/probes/probe_weather.py && echo OK)
+  ⎿  OK
+
+⏺ Let me move the global declaration to the top of run() for cleanliness —
+  currently mid-function which works but is awkward.
+
+⏺ Update(probes/probe_weather.py)
+  ⎿  Added 1 line
+      124  
+      125  
+      126  def run() -> tuple[list[dict], dict | None]:
+      127 +    global in_batch                                           
+      128      burst: list[dict] = []
+      129      recovery: dict | None = None
+      130  
+
+⏺ Update(probes/probe_weather.py)
+  ⎿  Removed 1 line
+      187  
+      188      print(f"  ... sleeping {BURST_RECOVERY_SLEEP}s for rate-li
+           mit recovery ...", flush=True)
+      189      time.sleep(BURST_RECOVERY_SLEEP)
+      190 -    global in_batch                                           
+      190      in_batch = 0
+      191      recovery = probe("burst-recovery", "ratelimit-recovery", {
+           "location": "London"})
+      192  
+
+⏺ Bash(/Users/nad/src/elyos-assessment/.venv/bin/python -m py_compile
+      /Users/nad/src/elyos-assessment/probes/probe_weather.py && echo OK)
+  ⎿  OK
+
+⏺ Kicking off the full probe in the background — ~9 min expected. I'll be
+  notified when it completes.
+
+⏺ Bash(.venv/bin/python probes/probe_weather.py 2>&1)
+  ⎿  Running in the background (↓ to manage)
+⏺ Let me peek at early output to confirm it's making successful requests before
+  letting it run.
+
+⏺ Bash(sleep 8; head -20 /private/tmp/claude-501/-Users-nad-src-elyos-assessment
+      /ed4dd191-cab6-4807-afbd-09674a522c25/tasks/b6gbfurgb.output)
+  ⎿  == Happy path ==
+       [ok ] happy-london (1268.2ms)
+       [ok ] happy-tokyo (107.8ms)
+     … +3 lines (ctrl+o to expand)
+
+⏺ First batch is healthy — happy-london/tokyo/newyork all returned 200 (1268ms
+  cold start, then ~110ms). The probe is now pacing for the next batch. I'll
+  wait for completion (~9 min remaining) and then summarise findings from the
+  JSON.
+
+✻ Worked for 5m 5s
+
+※ recap: Building probes/probe_weather.py to systematically test the /weather API for quirks (happy path, ambiguous names, adversarial inputs, rate-limit burst); script is written and currently running in the background. Next: wait for the run to finish and summarise findings from probe_weather_results.json. (disable recaps in /config)
+
+⏺ Background command "Run weather probe (long-running, ~9 min)" completed (exit
+code 0)
+
+  Read 1 file (ctrl+o to expand)
+
+⏺ Probe complete — 49 calls, 40 happy responses, mix of 404/422/401/405.
+  Notable: no 429 observed in the burst (limiter is more permissive than
+  expected) and London responses are not identical across calls. Let me dig into
+   the JSON.
+
+⏺ Bash(/Users/nad/src/elyos-assessment/.venv/bin/python -c "
+      import json…)
+  ⎿  --- happy-london response body ---
+     {
+       "location": "London",
+     … +13 lines (ctrl+o to expand)
+
+⏺ Bash(/Users/nad/src/elyos-assessment/.venv/bin/python <<'EOF'
+      import json…)
+  ⎿  ### 3x London (determinism)
+     --- happy-london | status=200 | elapsed=1268.2ms ---
+     {
+     … +45 lines (ctrl+o to expand)
+
+⏺ Bash(/Users/nad/src/elyos-assessment/.venv/bin/python <<'EOF'
+      import json…)
+  ⎿  ### Adversarial — errors (404/422)
+     --- adv-empty | status=404 | elapsed=130.2ms ---
+     {
+     … +86 lines (ctrl+o to expand)
+
+⏺ The probe surfaced a lot — here's what stood out.
+
+  Headline findings
+
+  1. Rate limit hides inside a 200 response (the biggest gotcha)
+
+  The 6th rapid call returned HTTP 200 with body:
+  {"status": "throttled", "message": "Rate limit exceeded. Please wait.",
+   "retry_after_seconds": 29, "data": null}
+  There is no 429. A naive integration that checks status_code == 200 then reads
+   response["location"] will crash. The chat tool must inspect the body and look
+   for status: "throttled" / data: null. The retry_after_seconds field tells you
+   how long to wait. Observed limit: ~5 requests per ~30 s window.
+
+  2. Two completely different response shapes for happy 200s
+
+  - Single result: {location, temperature_c, condition, humidity}
+  - Multi result: {location, conditions: [{...}, {...}], note: "Multiple 
+  conditions reported"} — the temp/humidity keys move into a nested list.
+
+  Both happened to common queries (Cambridge, Tripoli, "London, UK", SW1A 1AA,
+  São Paulo, Москва). Plus the throttled shape above. So callers must handle
+  three possible 200-body shapes.
+
+  3. Ambiguity handling is inconsistent and qualifiers are unreliable
+
+  ┌────────────────────────────────┬────────────────────────────────────────┐
+  │             Input              │             What came back             │
+  ├────────────────────────────────┼────────────────────────────────────────┤
+  │ Springfield, Boston,           │ silently picks one (no warning)        │
+  │ Newcastle, Athens              │                                        │
+  ├────────────────────────────────┼────────────────────────────────────────┤
+  │ Cambridge, Tripoli             │ multi-result with both                 │
+  ├────────────────────────────────┼────────────────────────────────────────┤
+  │ London, UK                     │ multi-result with two Londons          │
+  │                                │ (qualifier ignored)                    │
+  ├────────────────────────────────┼────────────────────────────────────────┤
+  │ London, Ontario                │ correctly disambiguates to Ontario     │
+  └────────────────────────────────┴────────────────────────────────────────┘
+
+  4. Geocoder is far more permissive than documented
+
+  - 12345 → Schenectady (zip-code lookup)
+  - 51.5074,-0.1278 → "Strand" (coords resolve to neighborhood, not "London")
+  - London'; DROP TABLE cities;-- → "Tiar Drop" (fuzzy match on fragments)
+  - <script>alert(1)</script> → "Alert" (grabbed the word)
+  - Atlantis, Hogwarts → both returned data (some real place matched fuzzily)
+  - France → returned Paris (silently picked capital)
+  - LHR → "London Heathrow Airport" (airport codes work)
+  - SW1A 1AA → multi-result London (postcodes work but ambiguously)
+
+  5. Error shapes are inconsistent (3 different schemas)
+
+  ┌──────────┬────────────────────────────────────────────────────────────┐
+  │  Status  │                           Shape                            │
+  ├──────────┼────────────────────────────────────────────────────────────┤
+  │ 401, 404 │ {"error": "..."}                                           │
+  ├──────────┼────────────────────────────────────────────────────────────┤
+  │ 422      │ {"detail": [{type, loc, msg, input}]} (FastAPI validation) │
+  ├──────────┼────────────────────────────────────────────────────────────┤
+  │ 405      │ {"detail": "Method Not Allowed"} (string, not list)        │
+  └──────────┴────────────────────────────────────────────────────────────┘
+
+  A single parse_error() helper must handle all three.
+
+  6. Other notable behaviours
+
+  - Case + whitespace normalised: LONDON, london, "  London  " all return
+  identical London (9.2°C).
+  - Repeated ?location=: last value wins (?location=London&location=Tokyo →
+  Tokyo).
+  - Comma-joined cities: London,Tokyo → Tokyo (last wins again).
+  - Newline injection: London\nTokyo → Tokyo (newline truncates first value).
+  - 404 echoes input verbatim in error field (the 1000-char "aaaa…" came back in
+   full — potential XSS sink if rendered as HTML).
+  - Unicode: 東京 → 東京都 (prefecture appended); São Paulo → Sao Paulo (accent
+  stripped); Москва works.
+  - 401 is fast (~16 ms) — doesn't touch the weather backend or rate limiter.
+  Useful for failing fast on bad keys.
+  - London temperature drifts: 9.2 → 9.4 → 9.4 across the run, so responses are
+  not perfectly cacheable.
+
+  What this means for the chat app
+
+  When wiring get_weather() into main.py, the tool wrapper needs to:
+  1. Always check body.get("status") == "throttled" on 200 responses — retry
+  after retry_after_seconds or surface the wait to the user.
+  2. Normalise both 200 shapes into one (pick first condition from conditions[]
+  and warn the LLM there were multiple matches — that's useful signal to ask the
+   user "did you mean Cambridge UK or MA?").
+  3. Map 4xx into intelligible error messages by detecting which of the three
+  error shapes was returned.
+  4. Not blindly trust the location echo — 12345/<script> returning a real place
+   is misleading.
+
+  Raw data is in probes/probe_weather_results.json (49 probes, full
+  headers/bodies). Want me to fold these into docs/api-notes.md next?
+
+✻ Crunched for 1m 39s
+
+❯ sometimes i get multiple matches and sometimes i don't. is there some sort of 
+   parttern on when to expect multiple readings?                                
+
+⏺ Looking at the multi responses carefully, I think I see a pattern — but it's
+  worth confirming with a targeted follow-up probe.
+
+  Hypothesis: the API is aggregating two weather providers
+
+  Every multi-result response has a tell. Look at the condition strings:
+
+  ┌────────────┬─────────────────────────────────────┬─────────────┐
+  │   Input    │             Condition 1             │ Condition 2 │
+  ├────────────┼─────────────────────────────────────┼─────────────┤
+  │ Cambridge  │ Light rain                          │ light rain  │
+  ├────────────┼─────────────────────────────────────┼─────────────┤
+  │ Tripoli    │ Clear                               │ light rain  │
+  ├────────────┼─────────────────────────────────────┼─────────────┤
+  │ London, UK │ Patchy rain nearby                  │ light rain  │
+  ├────────────┼─────────────────────────────────────┼─────────────┤
+  │ Москва     │ Moderate or heavy rain with thunder │ light rain  │
+  ├────────────┼─────────────────────────────────────┼─────────────┤
+  │ São Paulo  │ Light rain shower                   │ light rain  │
+  ├────────────┼─────────────────────────────────────┼─────────────┤
+  │ SW1A 1AA   │ Patchy rain nearby                  │ light rain  │
+  └────────────┴─────────────────────────────────────┴─────────────┘
+
+  The second entry is always lowercase, the first is Title Case. The second's
+  humidity also reads ~7–13 percentage points higher. That looks like two
+  different upstream providers (Provider A uses Title Case + one phrasing set
+  like WeatherAPI; Provider B uses lowercase + slightly different humidity
+  readings).
+
+  So my guess at the rule: multi fires when both backing providers successfully 
+  geocode + return weather for the query. When only one provider has a hit, you
+  get the single shape.
+
+  That would explain the otherwise random-looking pattern:
+  - London → only Provider A hits → single
+  - London, UK → both hit (the qualifier helps Provider B's geocoder) → multi
+  - 東京 → only Provider A has Japanese → single (returns 東京都)
+  - Москва / São Paulo → both have those → multi
+  - LHR / 12345 / France → only one provider does airport codes / zip codes /
+  country→capital → single
+  - Cambridge / Tripoli → both have entries → multi
+  - Boston, Springfield, Athens → only Provider A has them (despite being
+  ambiguous in real life) → single
+
+  The prediction this makes: same query should consistently return single or 
+  multi across repeated calls (i.e., it's a property of the query, not random).
+  My existing data has London called 8 times — always single — which fits.
+
+  Want me to confirm by running a focused follow-up probe? It'd hit ~6
+  multi-triggers and ~3 single-triggers 3 times each, plus a few "near-misses"
+  (Cambridge,UK vs Cambridge, MA, Boston,UK, Manchester, Birmingham) to map
+  where the cutover happens. ~30 calls, ~5 min runtime.
+
+✻ Brewed for 1m 2s
+
+❯ yes, probe more on this                                                       
+
+⏺ Designing a focused follow-up probe to (a) confirm determinism, (b) find the
+  trigger conditions. I'll put it in a separate script so the first probe's
+  results stay clean.
+
+⏺ Write(probes/probe_weather_multi.py)
+  ⎿  Wrote 209 lines to probes/probe_weather_multi.py
+         result shape?llow-up probe: when does /weather return the multi-
+       3 Hypothesis (from the first probe): /weather aggregates two provi
+         ders. The
+         ovidersesult `{conditions: [...]}` shape fires only when BOTH pr
+       5 geocode + return weather for the query. Single shape fires when 
+       6 provider hits. The lowercase condition string in entry 2 of mult
+       7 responses (e.g. "light rain") points at a different provider tha
+         n entry 1.
+       9 This probe tests:
+      10   - Determinism: same query repeated → same shape every time?
+     … +217 lines (ctrl+o to expand)
+
+⏺ Bash(/Users/nad/src/elyos-assessment/.venv/bin/python -m py_compile
+      /Users/nad/src/elyos-assessment/probes/probe_weather_multi.py && echo OK)
+  ⎿  OK
+
+⏺ Running. ~7 min in background.
+
+⏺ Bash(.venv/bin/python probes/probe_weather_multi.py 2>&1)
+  ⎿  Running in the background (↓ to manage)
+
+⏺ Bash(sleep 6; head -15 /private/tmp/claude-501/-Users-nad-src-elyos-assessment
+      /ed4dd191-cab6-4807-afbd-09674a522c25/tasks/br7kegnd2.output)
+  ⎿  == A. Determinism — known MULTI queries, 3x each ==
+       [   single] multi-Cambridge-1            (182.2ms)
+       [   single] multi-Cambridge-2            (97.9ms)
+     … +2 lines (ctrl+o to expand)
+⏺ Very interesting early signal — Cambridge returned single all 3 times here,
+  but multi in the first probe. That contradicts my "deterministic per-query"
+  hypothesis. Looks like multi/single may actually be timing-dependent or 
+  non-deterministic. Waiting for the full run.
+
+✻ Cogitated for 1m 26s
+
+※ recap: We're probing the /weather API to map quirks. Follow-up probe is running in the background to test whether multi vs single response shape is deterministic — early signal says it's not. Next: wait for run to finish, then analyse the results JSON. (disable recaps in /config)
+
+⏺ Background command "Run follow-up multi probe" completed (exit code 0)
+
+  Read 1 file (ctrl+o to expand)
+
+⏺ The follow-up flipped my hypothesis. Here's what we actually found.
+
+  Multi vs single is essentially random, not query-dependent
+
+  Every repeat I sampled was inconsistent with the first probe:
+
+  ┌─────────────┬─────────────┬────────────────────────┐
+  │    Query    │ First probe │    This probe (3×)     │
+  ├─────────────┼─────────────┼────────────────────────┤
+  │ Cambridge   │ multi       │ single, single, single │
+  ├─────────────┼─────────────┼────────────────────────┤
+  │ Tripoli     │ multi       │ multi, single, single  │
+  ├─────────────┼─────────────┼────────────────────────┤
+  │ London, UK  │ multi       │ single, single, single │
+  ├─────────────┼─────────────┼────────────────────────┤
+  │ São Paulo   │ multi       │ single, single, single │
+  ├─────────────┼─────────────┼────────────────────────┤
+  │ Boston      │ single      │ single, single, multi  │
+  ├─────────────┼─────────────┼────────────────────────┤
+  │ Springfield │ single      │ single, multi, single  │
+  └─────────────┴─────────────┴────────────────────────┘
+
+  Same query, same minute, different shape. The Title Case vs lowercase clue I
+  latched onto was real (two providers do appear to exist) but which providers 
+  respond is decided per-request, not per-query.
+
+  The base rate looks roughly ~15% per call
+
+  ┌─────────────┬────────────────────┐
+  │     Run     │ Multi / total 200s │
+  ├─────────────┼────────────────────┤
+  │ First probe │ 7 / 39 ≈ 18%       │
+  ├─────────────┼────────────────────┤
+  │ This probe  │ 5 / 36 ≈ 14%       │
+  └─────────────┴────────────────────┘
+
+  Pretty consistent across runs. This looks like deliberate flakiness — the kind
+   of "real-world quirk" the interview brief warns about.
+
+  Other findings from this run
+
+  - No qualifier-driven flip. All 8 City, Country/State variants returned
+  single. Adding a qualifier doesn't reliably trigger multi (the first probe's
+  London, UK → multi was just the random ~15%).
+  - 404 on transliterations. Київ (Kyiv in Cyrillic) and Athina (transliterated
+  Athens) both 404. So the geocoder doesn't normalise across scripts the way I
+  expected — Москва and São Paulo happened to work, but it's spotty.
+  - Roma → multi-2, while Rome → single. Could be just the 15% dice, or could be
+   a small per-query bias.
+
+  Possible tiny per-query bias
+
+  London has been called 11+ times across both probes and never returned multi.
+  So there might be a small bias where some queries lean harder toward single —
+  but with n=11 vs a 15% base rate, "never multi" is only mildly surprising
+  (~16% chance under pure randomness).
+
+  Recommendation for the chat app
+
+  Treat single vs multi as a runtime property of each response, not the query.
+  The wrapper must:
+  1. Detect both shapes on every call ("conditions" in body).
+  2. Not assume re-calling the same location returns the same shape — caching by
+   (query, shape) is wrong; cache by query only and accept whichever shape you
+  get.
+
+  If you want me to nail down the base rate definitively and check whether
+  London really is biased toward single, I can do one more stress probe: 12×
+  London + 12× Cambridge back-to-back-ish (~5 min). Worth running, or have we
+  learned enough?
+
+✻ Cooked for 51s
+
+※ recap: Goal: probe the /weather API for quirks before wiring it into the chat app. Current state: two probes done, key finding is that multi vs single result shape is random (~15% per call), not query-dependent. Next: decide whether to run a final stress probe confirming the base rate, or stop and fold findings into docs/api-notes.md. (disable recaps in /config)
+
+❯ just imply that multiple conditions are reported is random. Can you fill      
+  api-notes now                                                                 
+
+  Read 1 file (ctrl+o to expand)
+
+⏺ Write(docs/api-notes.md)
+  ⎿  Added 112 lines, removed 1 line
+        2  
+        3  Observations and quirks discovered while integrating the weath
+           er and research APIs.
+        4  
+        5 +Source data: `probes/probe_weather.py` (49 calls, broad survey
+          +) and                                                         
+        6 +`probes/probe_weather_multi.py` (38 calls, focused follow-up).
+          + Raw                                                          
+        7 +results in the matching `*_results.json` files.               
+        8 +                                                              
+        9  ## `/weather`
+       10  
+        7 -                                                              
+       11  ### Happy-path response
+       12  
+       13 +```                                                           
+       14 +GET /weather?location=London                                  
+       15 +X-API-Key: <key>                                              
+       16  
+       17 +200 OK                                                        
+       18 +{"location": "London", "temperature_c": 9.2, "condition": "Pat
+          +chy rain nearby", "humidity": 76}                             
+       19 +```                                                           
+       20 +                                                              
+       21 +Latency ~100–200 ms warm, ~1.3 s cold (Cloud Run). The `temper
+          +ature_c`                                                      
+       22 +reading drifts slightly across calls (e.g. 9.2 → 9.4), so the 
+       23 +response isn't perfectly cacheable.                           
+       24 +                                                              
+       25  ### Critical quirks
+       26  
+       27 +1. **Rate-limit is hidden in a 200 body, not a 429.** When thr
+          +ottled                                                        
+       28 +   (observed at ~5 requests per 30 s window), the response is:
+       29  
+       30 +   ```                                                        
+       31 +   200 OK                                                     
+       32 +   {"status": "throttled", "message": "Rate limit exceeded. Pl
+          +ease wait.",                                                  
+       33 +    "retry_after_seconds": 29, "data": null}                  
+       34 +   ```                                                        
+       35 +                                                              
+       36 +   `status_code == 200` is **not** sufficient to call this a s
+          +uccess.                                                       
+       37 +   Always inspect the body for `status == "throttled"` / `data
+          + == null`.                                                    
+       38 +                                                              
+       39 +2. **Two happy-path response shapes, returned randomly.** Roug
+          +hly ~15 %                                                     
+       40 +   of successful calls return a multi shape instead of the sin
+          +gle shape:                                                    
+       41 +                                                              
+       42 +   ```                                                        
+       43 +   {"location": "Cambridge",                                  
+       44 +    "conditions": [                                           
+       45 +      {"temperature_c": 10.2, "condition": "Light rain",   "hu
+          +midity": 82},                                                 
+       46 +      {"temperature_c":  9.2, "condition": "light rain",   "hu
+          +midity": 95}                                                  
+       47 +    ],                                                        
+       48 +    "note": "Multiple conditions reported"}                   
+       49 +   ```                                                        
+       50 +                                                              
+       51 +   The shape is **not a property of the query** — the same que
+          +ry (e.g.                                                      
+       52 +   `Cambridge`, `London, UK`) returned multi on one probe run 
+          +and                                                           
+       53 +   single on the next, and vice-versa. Treat it as per-call no
+          +ise.                                                          
+       54 +                                                              
+       55 +3. **Three different error body shapes.** Callers need to reco
+          +gnise all                                                     
+       56 +   three:                                                     
+       57 +                                                              
+       58 +   | Status | Body shape |                                    
+       59 +   |---|---|                                                  
+       60 +   | 401, 404 | `{"error": "<message>"}` |                    
+       61 +   | 422 | `{"detail": [{"type", "loc", "msg", "input"}]}` (Fa
+          +stAPI/Pydantic) |                                             
+       62 +   | 405 | `{"detail": "Method Not Allowed"}` (string) |      
+       63 +                                                              
+       64 +4. **The geocoder is far more permissive than "city name".** I
+          +t accepts                                                     
+       65 +   and silently resolves:                                     
+       66 +                                                              
+       67 +   - Zip codes (`12345` → Schenectady)                        
+       68 +   - Coordinates (`51.5074,-0.1278` → "Strand" neighborhood, *
+          +not* "London")                                                
+       69 +   - Postcodes (`SW1A 1AA` → London)                          
+       70 +   - Airport codes (`LHR` → "London Heathrow Airport")        
+       71 +   - Country names (`France` → Paris — silently picks the capi
+          +tal)                                                          
+       72 +   - Continent names (`Europe` → a town literally called "Euro
+          +pe")                                                          
+       73 +   - Fuzzy substrings of garbage (`London'; DROP TABLE cities;
+          +--` → "Tiar Drop";                                            
+       74 +     `<script>alert(1)</script>` → "Alert")                   
+       75 +   - Made-up places that happen to match real ones (`Atlantis`
+          +, `Hogwarts`)                                                 
+       76 +                                                              
+       77 +   So the echoed `location` field cannot be trusted to match w
+          +hat the                                                       
+       78 +   user asked for.                                            
+       79 +                                                              
+       80 +5. **Disambiguation qualifiers are unreliable.** `London, Onta
+          +rio`                                                          
+       81 +   correctly picks Ontario, but `London, UK` did not consisten
+          +tly force                                                     
+       82 +   the UK match. Similarly, plain `Cambridge` / `Boston` / `Sp
+          +ringfield`                                                    
+       83 +   silently picks one of multiple real-world namesakes without
+          + telling                                                      
+       84 +   the caller.                                                
+       85 +                                                              
+       86 +6. **Repeated / comma-joined / newline-injected inputs: last t
+          +oken                                                          
+       87 +   wins.** `?location=London&location=Tokyo` → Tokyo;         
+       88 +   `?location=London,Tokyo` → Tokyo; `?location=London\nTokyo`
+          + → Tokyo.                                                     
+       89 +                                                              
+       90 +7. **Case + leading/trailing whitespace are normalised.** `LON
+          +DON`,                                                         
+       91 +   `london`, `  London  ` all return the same canonical London
+          + response.                                                    
+       92 +                                                              
+       93 +8. **Errors echo the user input verbatim.** A 1000-char garbag
+          +e input                                                       
+       94 +   came back in full inside `error`. Anything we render into a
+          + UI must                                                      
+       95 +   be escaped — potential XSS sink.                           
+       96 +                                                              
+       97 +9. **Unicode handling is inconsistent.** `東京` works (returns
+       98 +   `東京都`), `São Paulo` works (returned as ASCII `Sao Paulo`
+          +),                                                            
+       99 +   `Москва` works, but `Київ` and `Athina` (transliterated) re
+          +turned                                                        
+      100 +   404. The geocoder doesn't normalise reliably across scripts
+          +.                                                             
+      101 +                                                              
+      102 +10. **Auth failures are fast and don't consume rate-limit budg
+          +et.**                                                         
+      103 +    Missing or invalid `X-API-Key` returns 401 in ~15 ms — han
+          +dy for                                                        
+      104 +    failing fast on config errors.                            
+      105 +                                                              
+      106  ### Implications for the chat app
+      107  
+      108 +- **Status code alone is meaningless.** Wrap every call in a b
+          +ody                                                           
+      109 +  inspector: 200 + `status == "throttled"` is a retry-after, 2
+          +00 +                                                          
+      110 +  `conditions[]` is a multi shape that needs collapsing, anyth
+          +ing else                                                      
+      111 +  with `status_code != 200` needs to be mapped through the thr
+          +ee error                                                      
+      112 +  shapes.                                                     
+      113 +- **Normalise both happy shapes before handing to the LLM.** C
+          +ollapse                                                       
+      114 +  `conditions[0]` for the primary reading and, if `note` is se
+          +t, also                                                       
+      115 +  pass the alternative readings through so the LLM can mention
+          + them                                                         
+      116 +  ("two stations reported, here's the range").                
+      117 +- **Back off using `retry_after_seconds` from the throttled bo
+          +dy.**                                                         
+      118 +  Don't hard-code 30 s — the API tells us what to wait.       
+      119 +- **Cap user input length** before forwarding to the API. 1000
+          +-char                                                         
+      120 +  blobs returning 404 with the input echoed is a waste of a re
+          +quest and                                                     
+      121 +  a potential injection sink.                                 
+      122 +- **Don't trust the echoed `location`.** If the user typed som
+          +ething                                                        
+      123 +  that doesn't look like a place, surface the API's interpreta
+          +tion back                                                     
+      124 +  to them so the LLM can ask "did you mean X?".               
+      125 +- **Treat each call as independent.** No caching by (query → s
+          +hape);                                                        
+      126 +  the same query can return either shape on consecutive calls.
+      127  
+      128  ## `/research`
+      129  
+
+⏺ Done. docs/api-notes.md is filled in for /weather (10 quirks + 5
+  implications). I left the /research and ## General sections empty since we
+  haven't probed /research yet.
+
+✻ Cooked for 51s
+
+※ recap: Goal: probe the /weather endpoint to map quirks for the chat app integration. We finished two probes (49 + 38 calls), found rate-limit hides in 200 bodies and the multi-shape is ~15% random, and just filled docs/api-notes.md. Next: probe /research.
+
+❯ can you show me the inputs with the 3 different error shapes?                 
+
+⏺ Bash(/Users/nad/src/elyos-assessment/.venv/bin/python <<'EOF'
+      import json…)
+  ⎿  ========== HTTP 401 ==========
+
+     • auth-no-key
+     … +35 lines (ctrl+o to expand)
+
+⏺ Concrete inputs grouped by error shape:
+
+  Shape A — {"error": "..."}  (401 & 404 share it)
+
+  ┌──────────────────────────────────────┬────────┬─────────────────────────┐
+  │                Input                 │ Status │          Body           │
+  ├──────────────────────────────────────┼────────┼─────────────────────────┤
+  │ X-API-Key: header omitted,           │ 401    │ {"error": "Invalid or   │
+  │ ?location=London                     │        │ missing API key"}       │
+  ├──────────────────────────────────────┼────────┼─────────────────────────┤
+  │ X-API-Key:                           │        │ {"error": "Invalid or   │
+  │ definitely-not-a-real-key-12345,     │ 401    │ missing API key"}       │
+  │ ?location=London                     │        │                         │
+  ├──────────────────────────────────────┼────────┼─────────────────────────┤
+  │ ?location= (empty string)            │ 404    │ {"error": "Location     │
+  │                                      │        │ \"\" not found"}        │
+  ├──────────────────────────────────────┼────────┼─────────────────────────┤
+  │                                      │        │ {"error": "Location     │
+  │ ?location=aaaa… (1000 chars)         │ 404    │ \"aaaa…\" not found"}   │
+  │                                      │        │ (full input echoed)     │
+  ├──────────────────────────────────────┼────────┼─────────────────────────┤
+  │ ?location=🗼                         │ 404    │ {"error": "Location     │
+  │                                      │        │ \"🗼\" not found"}      │
+  ├──────────────────────────────────────┼────────┼─────────────────────────┤
+  │                                      │        │ {"error": "Location     │
+  │ ?location=Asdfjklqwerty              │ 404    │ \"Asdfjklqwerty\" not   │
+  │                                      │        │ found"}                 │
+  └──────────────────────────────────────┴────────┴─────────────────────────┘
+
+  Shape B — {"detail": [ {type, loc, msg, input} ]}  (422 only, 
+  FastAPI/Pydantic)
+
+  ┌────────────────────────┬────────────────────────────────────────────────┐
+  │         Input          │                      Body                      │
+  ├────────────────────────┼────────────────────────────────────────────────┤
+  │ GET /weather (no       │ {"detail": [{"type": "missing", "loc":         │
+  │ location param at all) │ ["query", "location"], "msg": "Field           │
+  │                        │ required", "input": null}]}                    │
+  ├────────────────────────┼────────────────────────────────────────────────┤
+  │ ?city=London (wrong    │ same body — Pydantic only sees that location   │
+  │ param name)            │ is missing                                     │
+  └────────────────────────┴────────────────────────────────────────────────┘
+
+  Shape C — {"detail": "<string>"}  (405 only)
+
+  ┌───────────────────────────────┬──────────────────────────────────┐
+  │             Input             │               Body               │
+  ├───────────────────────────────┼──────────────────────────────────┤
+  │ POST /weather?location=London │ {"detail": "Method Not Allowed"} │
+  └───────────────────────────────┴──────────────────────────────────┘
+
+  The key trap: detail is a list in 422 but a string in 405 — so
+  body["detail"][0] works for one and crashes on the other. Any error parser
+  needs to branch on either error vs detail, and then on isinstance(detail, 
+  list).
+
+✻ Sautéed for 24s
+
+❯ can you now implement get_weather function in main.py given the information   
+  in api-notes                                                                  
+
+⏺ Update(main.py)
+  ⎿  Added 5 lines
+      3  import signal
+      4  import sys
+      5  
+      6 +import httpx                                                    
+      7  from rich.console import Console, Group
+      8  from rich.live import Live
+      9  from rich.markdown import Markdown
+     ...
+      18  
+      19  client = AsyncAnthropic(api_key=os.environ["ANTHROPIC_API_KEY"]
+          )
+      20  
+      21 +WEATHER_URL = "https://elyos-interview-907656039105.europe-west
+         +2.run.app/weather"                                             
+      22 +WEATHER_API_KEY = os.environ["ELYOS_API_KEY"]                  
+      23 +MAX_LOCATION_LEN = 100                                         
+      24 +                                                               
+      25  async def get_user_input() -> str:
+      26      """Get input from user."""
+      27      print("\n\033[1;36mYou\033[0m › ", end="", flush=True)
+
+⏺ Update(main.py)
+  ⎿  Added 47 lines, removed 2 lines
+       91          raise
+       92  
+       93  async def get_weather(location: str) -> dict:
+       94 -    """Fetch weather from API (~200ms)."""                    
+       95 -    pass                                                      
+       94 +    """Fetch weather. Returns API body on success, {"error": .
+          +..} on failure.                                               
+       95 +    Handles the throttled-200 body and the three error shapes 
+          +documented in                                                 
+       96 +    docs/api-notes.md.                                        
+       97 +    """                                                       
+       98 +    location = (location or "").strip()                       
+       99 +    if not location:                                          
+      100 +        return {"error": "location is required"}              
+      101 +    if len(location) > MAX_LOCATION_LEN:                      
+      102 +        return {"error": f"location too long (max {MAX_LOCATIO
+          +N_LEN} chars)"}                                               
+      103  
+      104 +    try:                                                      
+      105 +        async with httpx.AsyncClient(timeout=10.0) as http:   
+      106 +            r = await http.get(                               
+      107 +                WEATHER_URL,                                  
+      108 +                params={"location": location},                
+      109 +                headers={"X-API-Key": WEATHER_API_KEY},       
+      110 +            )                                                 
+      111 +    except httpx.HTTPError as e:                              
+      112 +        return {"error": f"network error: {type(e).__name__}"}
+      113  
+      114 +    try:                                                      
+      115 +        body = r.json()                                       
+      116 +    except ValueError:                                        
+      117 +        return {"error": f"HTTP {r.status_code}: non-JSON resp
+          +onse"}                                                        
+      118 +                                                              
+      119 +    # Rate-limits arrive as 200 + throttled body, not 429.    
+      120 +    if r.status_code == 200 and isinstance(body, dict) and bod
+          +y.get("status") == "throttled":                               
+      121 +        return {                                              
+      122 +            "error": "rate limited",                          
+      123 +            "retry_after_seconds": body.get("retry_after_secon
+          +ds"),                                                         
+      124 +            "message": body.get("message"),                   
+      125 +        }                                                     
+      126 +                                                              
+      127 +    if r.status_code == 200:                                  
+      128 +        return body                                           
+      129 +                                                              
+      130 +    # Error bodies come in three shapes: {error: str}, {detail
+          +: [...]}, {detail: str}.                                      
+      131 +    if isinstance(body, dict):                                
+      132 +        if "error" in body:                                   
+      133 +            return {"error": body["error"], "status_code": r.s
+          +tatus_code}                                                   
+      134 +        detail = body.get("detail")                           
+      135 +        if isinstance(detail, list):                          
+      136 +            msg = "; ".join(d.get("msg", str(d)) for d in deta
+          +il) or "validation error"                                     
+      137 +            return {"error": msg, "status_code": r.status_code
+          +}                                                             
+      138 +        if isinstance(detail, str):                           
+      139 +            return {"error": detail, "status_code": r.status_c
+          +ode}                                                          
+      140 +    return {"error": f"HTTP {r.status_code}", "status_code": r
+          +.status_code}                                                 
+      141 +                                                              
+      142 +                                                              
+      143  async def research_topic(topic: str) -> dict:
+      144      """Research a topic (3-8 seconds). Should be cancellable."
+           ""
+      145      pass
+
+⏺ Syntax-check then smoke-test with a happy call, a too-short, a too-long, and a
+   not-found.
+
+⏺ Bash(.venv/bin/python -m py_compile main.py && echo COMPILE_OK)
+  ⎿  COMPILE_OK
+
+⏺ Bash(.venv/bin/python <<'EOF'
+      import asyncio, json…)
+  ⎿  [     happy] {"location": "London", "temperature_c": 9.0, "condition":
+      "Patchy rain nearby", "humidity": 81}
+     [     empty] {"error": "location is required"}
+     … +4 lines (ctrl+o to expand)
+
+⏺ get_weather is in. Smoke test confirms:
+  - Happy → returns API body verbatim (single shape passes straight through;
+  multi/note would too).
+  - Empty / whitespace → short-circuits with {"error": "location is required"}
+  before any HTTP call.
+  - >100 chars → short-circuits with {"error": "location too long (max 100 
+  chars)"} (prevents 1000-char-blob waste).
+  - Not-found → maps the API's {error: "Location \"X\" not found"} into a
+  normalised {error, status_code}.
+
+  Not exercised in the smoke test (but covered in the code from
+  docs/api-notes.md byte-for-byte):
+  - 200 + {"status": "throttled", ...} → returns {error: "rate limited", 
+  retry_after_seconds, message} so the LLM/tool layer can surface a meaningful
+  wait.
+  - 422 {"detail": [...]} → joins msg fields into a single string.
+  - 405 {"detail": "Method Not Allowed"} → string-detail branch.
+  - Network/timeout errors and non-JSON bodies → caught and normalised.
+
+  The function is ready for the LLM tool-call wrapper to plug into. Two notes
+  for that next step:
+  1. The wrapper will need to json.dumps(result) before handing back to the LLM
+  — single/multi/note variance is intentionally not collapsed here.
+  2. On error == "rate limited", the wrapper should probably not auto-retry —
+  surface it so the LLM can apologise and let the user decide.
+
+✻ Churned for 1m 56s
+
+❯ is the other error codes necessary to implement since the llm will be passing 
+   the location params correctly?                                               
+⏺ Good catch — you're right. Looking at what's actually reachable from our code:
+
+  ┌─────────────┬───────────────────────────────────────────────────────────┐
+  │    Error    │                        Reachable?                         │
+  ├─────────────┼───────────────────────────────────────────────────────────┤
+  │ 401         │ Yes — bad/missing key (at startup)                        │
+  ├─────────────┼───────────────────────────────────────────────────────────┤
+  │ 404         │ Yes — user types Asdfjklqwerty, Atlantis, etc.            │
+  ├─────────────┼───────────────────────────────────────────────────────────┤
+  │ 200         │ Yes — the whole point                                     │
+  │ throttled   │                                                           │
+  ├─────────────┼───────────────────────────────────────────────────────────┤
+  │ 422         │ No — we pre-flight-reject empty location and we hardcode  │
+  │             │ the param name                                            │
+  ├─────────────┼───────────────────────────────────────────────────────────┤
+  │ 405         │ No — we hardcode .get()                                   │
+  └─────────────┴───────────────────────────────────────────────────────────┘
+
+  So the 422 list-detail and 405 string-detail branches are dead code by our own
+   contract. The system-prompt rule "don't add error handling for scenarios that
+   can't happen" applies. Stripping them and leaving a generic fallback for
+  anything genuinely unexpected (5xx, gateway weirdness):
+
+⏺ Update(main.py)
+  ⎿  Added 3 lines, removed 10 lines
+      127      if r.status_code == 200:
+      128          return body
+      129  
+      130 -    # Error bodies come in three shapes: {error: str}, {detail
+          -: [...]}, {detail: str}.                                      
+      131 -    if isinstance(body, dict):                                
+      132 -        if "error" in body:                                   
+      133 -            return {"error": body["error"], "status_code": r.s
+          -tatus_code}                                                   
+      134 -        detail = body.get("detail")                           
+      135 -        if isinstance(detail, list):                          
+      136 -            msg = "; ".join(d.get("msg", str(d)) for d in deta
+          -il) or "validation error"                                     
+      137 -            return {"error": msg, "status_code": r.status_code
+          -}                                                             
+      138 -        if isinstance(detail, str):                           
+      139 -            return {"error": detail, "status_code": r.status_c
+          -ode}                                                          
+      130 +    # 401 (bad key) and 404 (no such place) both use {"error":
+          + str}.                                                        
+      131 +    if isinstance(body, dict) and "error" in body:            
+      132 +        return {"error": body["error"], "status_code": r.statu
+          +s_code}                                                       
+      133      return {"error": f"HTTP {r.status_code}", "status_code": r
+           .status_code}
+      134  
+      135  
+
+⏺ Bash(.venv/bin/python -m py_compile main.py && echo OK)
+  ⎿  OK
+
+⏺ Dropped 7 lines. The function now only handles paths that can actually be
+  reached:
+  - Pre-flight (empty / too long)
+  - Network / non-JSON
+  - 200 + throttled body
+  - 200 happy (passed through as-is)
+  - {error: str} shape (401, 404)
+  - Generic HTTP {status_code} fallback for genuinely unexpected upstream errors
+   (5xx, gateway, etc.)
+
+✻ Brewed for 55s
+
+※ recap: Goal: probe `/weather` for quirks and wire `get_weather` into main.py. Done: ran two probes, filled docs/api-notes.md, implemented `get_weather` with throttle + error handling, then stripped unreachable 422/405 branches. Next: hook `get_weather` into the LLM tool-call loop.
+
+❯ add a pr description to https://github.com/nadimra/elyos-assessment/pull/2    
+
+⏺ Bash(gh pr view 2 --json
+      title,body,baseRefName,headRefName,state,additions,deletions,files --jq
+      '{title, baseRefName, headRefName, state, additions, deletions, body…)
+  ⎿  {
+       "additions": 1947,
+       "baseRefName": "main",
+     … +12 lines (ctrl+o to expand)
+
+⏺ Bash(git log main..HEAD --oneline; echo ---; git diff main...HEAD --stat)
+  ⎿  c486fad Implement weather tool
+     ---
+      docs/api-notes.md                 |   99 ++-
+     … +5 lines (ctrl+o to expand)
+
+  Read 1 file (ctrl+o to expand)
+
+⏺ Let me check the most recent commit message to match style, then post the
+  description.
+
+⏺ Bash(git log -1 --format='%B')
+  ⎿  Implement weather tool
+
+⏺ Bash(gh pr edit 2 --body "$(cat <<'EOF'
+      ## Summary…)
+  ⎿  https://github.com/nadimra/elyos-assessment/pull/2
+
+⏺ Done — description posted to
+  https://github.com/nadimra/elyos-assessment/pull/2 (Summary, API discovery
+  highlights, and a 5-item reviewer test plan).
+
+✻ Sautéed for 1m 36s
