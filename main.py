@@ -23,78 +23,21 @@ client = AsyncAnthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
 ELYOS_BASE = "https://elyos-interview-907656039105.europe-west2.run.app"
 ELYOS_API_KEY = os.environ["ELYOS_API_KEY"]
 
-TOOLS = [
-    {
-        "name": "get_weather",
-        "description": (
-            "Get current weather for a city. "
-            "Expects a city name, optionally with a country or region qualifier "
-            "(e.g. 'London', 'London, UK', 'Springfield, IL'). "
-            "The underlying geocoder is fuzzy and will silently return the wrong "
-            "place for coordinates, ZIP/postal codes, ISO country codes (e.g. 'GB'), "
-            "airport codes, or vague inputs — for any of those, ASK the user to "
-            "clarify which city they mean instead of calling this tool. "
-            "If the returned location field doesn't match what the user asked for, "
-            "mention the ambiguity in your reply rather than presenting it as the "
-            "answer. "
-            "Responses sometimes contain a 'conditions' array with multiple "
-            "readings instead of a single reading. When that happens, you MUST "
-            "make the multiplicity explicit — e.g. 'Manchester (2 readings: "
-            "9.1°C overcast, 8.1°C light rain)'. Never combine them with a "
-            "slash like '9.1°C / 8.1°C', and never average or range them. The "
-            "semantics of multi-reading responses aren't documented, so the "
-            "user needs to see them as distinct data points."
-        ),
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "location": {
-                    "type": "string",
-                    "description": (
-                        "City name, optionally with a country/region qualifier — "
-                        "e.g. 'London', 'London, UK', 'Springfield, IL'. "
-                        "Do not pass coordinates, ZIP codes, country codes, or "
-                        "airport codes."
-                    ),
-                },
-            },
-            "required": ["location"],
-        },
-    },
-        {
-        "name": "research_topic",
-        "description": (
-            "Research a topic in depth. Takes 3-15 seconds. Use only for "
-            "research-style asks, not for facts you already know well. "
-            "Only the 'summary' field is research content; the rest is metadata. "
-            "RESPOND IN THIS EXACT FORMAT: "
-            "'Our dedicated research API returned this summary: \"<verbatim "
-            "summary text>\".' Quote the summary verbatim — do not paraphrase, "
-            "condense, or rewrite it. "
-            "ONLY if the summary is genuinely insufficient for what the user "
-            "asked (too brief, or missing the specific aspect they asked about), "
-            "append a second paragraph starting EXACTLY with: 'Outside of the "
-            "research API, I found this information: ' followed by your own "
-            "knowledge. If the summary covers the question, do NOT add anything "
-            "beyond the quoted summary. "
-            "Never blend your own knowledge into the quoted summary or present "
-            "it as if it came from the research. "
-            "If 'cached': true, tell the user the info may be out of date. "
-            "For ambiguous topics ('football', 'mercury'), ASK the user to "
-            "clarify first — each call is slow and rate-limited."
-        ),
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "topic": {
-                    "type": "string",
-                    "description": "A specific, disambiguated topic to research.",
-                },
-            },
-            "required": ["topic"],
-        },
-    },
-]
+TOOLS: list[dict] = []
+TOOL_FUNCS: dict = {}
+TOOL_STATUS: dict = {}
+
+def tool(*, name, description, input_schema, status):
+    def decorator(func):
+        TOOLS.append({
+            "name": name,
+            "description": description,
+            "input_schema": input_schema,
+        })
+        TOOL_FUNCS[name] = func
+        TOOL_STATUS[name] = status
+        return func
+    return decorator
 
 async def get_user_input() -> str:
     """Get input from user."""
@@ -201,6 +144,44 @@ async def stream_response(user_input: str, conversation_history: list):
             conversation_history.append({"role": "assistant", "content": content})
         raise
 
+@tool(
+    name="get_weather",
+    description=(
+        "Get current weather for a city. "
+        "Expects a city name, optionally with a country or region qualifier "
+        "(e.g. 'London', 'London, UK', 'Springfield, IL'). "
+        "The underlying geocoder is fuzzy and will silently return the wrong "
+        "place for coordinates, ZIP/postal codes, ISO country codes (e.g. 'GB'), "
+        "airport codes, or vague inputs — for any of those, ASK the user to "
+        "clarify which city they mean instead of calling this tool. "
+        "If the returned location field doesn't match what the user asked for, "
+        "mention the ambiguity in your reply rather than presenting it as the "
+        "answer. "
+        "Responses sometimes contain a 'conditions' array with multiple "
+        "readings instead of a single reading. When that happens, you MUST "
+        "make the multiplicity explicit — e.g. 'Manchester (2 readings: "
+        "9.1°C overcast, 8.1°C light rain)'. Never combine them with a "
+        "slash like '9.1°C / 8.1°C', and never average or range them. The "
+        "semantics of multi-reading responses aren't documented, so the "
+        "user needs to see them as distinct data points."
+    ),
+    input_schema={
+        "type": "object",
+        "properties": {
+            "location": {
+                "type": "string",
+                "description": (
+                    "City name, optionally with a country/region qualifier — "
+                    "e.g. 'London', 'London, UK', 'Springfield, IL'. "
+                    "Do not pass coordinates, ZIP codes, country codes, or "
+                    "airport codes."
+                ),
+            },
+        },
+        "required": ["location"],
+    },
+    status=lambda args: f"Looking up weather in {args.get('location', '?')}...",
+)
 async def get_weather(location: str) -> dict:
     """Fetch weather from API (~200ms typical)."""
     try:
@@ -221,6 +202,40 @@ async def get_weather(location: str) -> dict:
         }
     return body
 
+@tool(
+    name="research_topic",
+    description=(
+        "Research a topic in depth. Takes 3-15 seconds. Use only for "
+        "research-style asks, not for facts you already know well. "
+        "Only the 'summary' field is research content; the rest is metadata. "
+        "RESPOND IN THIS EXACT FORMAT: "
+        "'Our dedicated research API returned this summary: \"<verbatim "
+        "summary text>\".' Quote the summary verbatim — do not paraphrase, "
+        "condense, or rewrite it. "
+        "ONLY if the summary is genuinely insufficient for what the user "
+        "asked (too brief, or missing the specific aspect they asked about), "
+        "append a second paragraph starting EXACTLY with: 'Outside of the "
+        "research API, I found this information: ' followed by your own "
+        "knowledge. If the summary covers the question, do NOT add anything "
+        "beyond the quoted summary. "
+        "Never blend your own knowledge into the quoted summary or present "
+        "it as if it came from the research. "
+        "If 'cached': true, tell the user the info may be out of date. "
+        "For ambiguous topics ('football', 'mercury'), ASK the user to "
+        "clarify first — each call is slow and rate-limited."
+    ),
+    input_schema={
+        "type": "object",
+        "properties": {
+            "topic": {
+                "type": "string",
+                "description": "A specific, disambiguated topic to research.",
+            },
+        },
+        "required": ["topic"],
+    },
+    status=lambda args: f"Researching {args.get('topic', '?')}... (CTRL+C to cancel)",
+)
 async def research_topic(topic: str) -> dict:
     """Research a topic. 3-15s observed — timeout set above the worst case."""
     try:
@@ -246,13 +261,6 @@ async def research_topic(topic: str) -> dict:
     if isinstance(body, dict):
         body.pop("sources", None)
     return body
-
-TOOL_FUNCS = {"get_weather": get_weather, "research_topic": research_topic}
-
-TOOL_STATUS = {
-    "get_weather": lambda args: f"Looking up weather in {args.get('location', '?')}...",
-    "research_topic": lambda args: f"Researching {args.get('topic', '?')}... (CTRL+C to cancel)",
-}
 
 async def main():
     # asyncio.run's SIGINT handler counts cumulative Ctrl+Cs and raises
