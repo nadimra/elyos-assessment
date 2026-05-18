@@ -1,0 +1,1194 @@
+{
+  "run_started_at": "2026-05-18T17:09:18.888062+00:00",
+  "run_finished_at": "2026-05-18T17:21:40.396598+00:00",
+  "base_url": "https://elyos-interview-907656039105.europe-west2.run.app",
+  "probes": [
+    {
+      "name": "happy-solar",
+      "category": "happy",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/research",
+      "params": {
+        "topic": "solar energy"
+      },
+      "auth": "valid",
+      "timeout": null,
+      "status": 200,
+      "elapsed_ms": 8003.2,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "c4c9aec65278167ad80bddb18c1bfa28;o=1",
+        "date": "Mon, 18 May 2026 17:09:26 GMT",
+        "server": "Google Frontend",
+        "content-length": "251",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "topic": "solar energy",
+        "summary": "Research summary for 'solar energy'. This analysis covers key aspects and recent developments in the field.",
+        "sources": [
+          "nature.com",
+          "sciencedirect.com",
+          "arxiv.org"
+        ],
+        "generated_at": "2026-05-18T17:09:26.887011+00:00"
+      },
+      "error": null
+    },
+    {
+      "name": "happy-climate",
+      "category": "happy",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/research",
+      "params": {
+        "topic": "climate change"
+      },
+      "auth": "valid",
+      "timeout": null,
+      "status": 200,
+      "elapsed_ms": 4991.7,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "62971ca9d2ea6e3b7cc34bc321bb38a0",
+        "date": "Mon, 18 May 2026 17:09:31 GMT",
+        "server": "Google Frontend",
+        "content-length": "279",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "topic": "climate change",
+        "summary": "Research on 'climate change' from early 2024. This cached summary may not reflect recent developments.",
+        "sources": [
+          "nature.com",
+          "sciencedirect.com",
+          "arxiv.org"
+        ],
+        "generated_at": "2024-03-15T09:00:00Z",
+        "cached": true,
+        "cache_age_seconds": 26784000
+      },
+      "error": null
+    },
+    {
+      "name": "happy-quantum",
+      "category": "happy",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/research",
+      "params": {
+        "topic": "quantum computing"
+      },
+      "auth": "valid",
+      "timeout": null,
+      "status": 200,
+      "elapsed_ms": 4965.4,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "b44f5d80e31c5dc970993c345a1cd5d0;o=1",
+        "date": "Mon, 18 May 2026 17:10:08 GMT",
+        "server": "Google Frontend",
+        "content-length": "261",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "topic": "quantum computing",
+        "summary": "Research summary for 'quantum computing'. This analysis covers key aspects and recent developments in the field.",
+        "sources": [
+          "nature.com",
+          "sciencedirect.com",
+          "arxiv.org"
+        ],
+        "generated_at": "2026-05-18T17:10:08.684625+00:00"
+      },
+      "error": null
+    },
+    {
+      "name": "case-upper",
+      "category": "format",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/research",
+      "params": {
+        "topic": "SOLAR ENERGY"
+      },
+      "auth": "valid",
+      "timeout": null,
+      "status": 200,
+      "elapsed_ms": 3884.4,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "e236ac493aa77a04223a12109972fb89",
+        "date": "Mon, 18 May 2026 17:10:12 GMT",
+        "server": "Google Frontend",
+        "content-length": "251",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "topic": "SOLAR ENERGY",
+        "summary": "Research summary for 'SOLAR ENERGY'. This analysis covers key aspects and recent developments in the field.",
+        "sources": [
+          "nature.com",
+          "sciencedirect.com",
+          "arxiv.org"
+        ],
+        "generated_at": "2026-05-18T17:10:12.734182+00:00"
+      },
+      "error": null
+    },
+    {
+      "name": "case-lower",
+      "category": "format",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/research",
+      "params": {
+        "topic": "solar energy"
+      },
+      "auth": "valid",
+      "timeout": null,
+      "status": 200,
+      "elapsed_ms": 7618.6,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "e83510f3ee9566c024a4f79dfbdf2850;o=1",
+        "date": "Mon, 18 May 2026 17:10:52 GMT",
+        "server": "Google Frontend",
+        "content-length": "275",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "topic": "solar energy",
+        "summary": "Research on 'solar energy' from early 2024. This cached summary may not reflect recent developments.",
+        "sources": [
+          "nature.com",
+          "sciencedirect.com",
+          "arxiv.org"
+        ],
+        "generated_at": "2024-03-15T09:00:00Z",
+        "cached": true,
+        "cache_age_seconds": 26784000
+      },
+      "error": null
+    },
+    {
+      "name": "ws-padded",
+      "category": "format",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/research",
+      "params": {
+        "topic": "  solar energy  "
+      },
+      "auth": "valid",
+      "timeout": null,
+      "status": 200,
+      "elapsed_ms": 15024.0,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "2f60e7217472132f936c323fa14ffbf2",
+        "date": "Mon, 18 May 2026 17:11:07 GMT",
+        "server": "Google Frontend",
+        "content-length": "2",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {},
+      "error": null
+    },
+    {
+      "name": "plus-encoding",
+      "category": "format",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/research",
+      "params": {
+        "topic": "solar+energy"
+      },
+      "auth": "valid",
+      "timeout": null,
+      "status": 200,
+      "elapsed_ms": 3366.0,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "4c1b42842db8522225ab8462a6387474;o=1",
+        "date": "Mon, 18 May 2026 17:11:42 GMT",
+        "server": "Google Frontend",
+        "content-length": "251",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "topic": "solar+energy",
+        "summary": "Research summary for 'solar+energy'. This analysis covers key aspects and recent developments in the field.",
+        "sources": [
+          "nature.com",
+          "sciencedirect.com",
+          "arxiv.org"
+        ],
+        "generated_at": "2026-05-18T17:11:42.743782+00:00"
+      },
+      "error": null
+    },
+    {
+      "name": "multi-word",
+      "category": "format",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/research",
+      "params": {
+        "topic": "the history of quantum computing in europe"
+      },
+      "auth": "valid",
+      "timeout": null,
+      "status": 200,
+      "elapsed_ms": 3268.5,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "48fd6f48d9770fa525ab8462a6387128",
+        "date": "Mon, 18 May 2026 17:11:45 GMT",
+        "server": "Google Frontend",
+        "content-length": "311",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "topic": "the history of quantum computing in europe",
+        "summary": "Research summary for 'the history of quantum computing in europe'. This analysis covers key aspects and recent developments in the field.",
+        "sources": [
+          "nature.com",
+          "sciencedirect.com",
+          "arxiv.org"
+        ],
+        "generated_at": "2026-05-18T17:11:45.931720+00:00"
+      },
+      "error": null
+    },
+    {
+      "name": "repeated-param",
+      "category": "format",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/research",
+      "params": {
+        "topic": [
+          "solar energy",
+          "wind energy"
+        ]
+      },
+      "auth": "valid",
+      "timeout": null,
+      "status": 200,
+      "elapsed_ms": 3426.7,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "cc44729b975da9391981f0a35c9b7cee;o=1",
+        "date": "Mon, 18 May 2026 17:12:21 GMT",
+        "server": "Google Frontend",
+        "content-length": "249",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "topic": "wind energy",
+        "summary": "Research summary for 'wind energy'. This analysis covers key aspects and recent developments in the field.",
+        "sources": [
+          "nature.com",
+          "sciencedirect.com",
+          "arxiv.org"
+        ],
+        "generated_at": "2026-05-18T17:12:21.272121+00:00"
+      },
+      "error": null
+    },
+    {
+      "name": "adv-empty",
+      "category": "adversarial",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/research",
+      "params": {
+        "topic": ""
+      },
+      "auth": "valid",
+      "timeout": null,
+      "status": 200,
+      "elapsed_ms": 6450.9,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "0a6837142e836c621981f0a35c9b7d13",
+        "date": "Mon, 18 May 2026 17:12:27 GMT",
+        "server": "Google Frontend",
+        "content-length": "227",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "topic": "",
+        "summary": "Research summary for ''. This analysis covers key aspects and recent developments in the field.",
+        "sources": [
+          "nature.com",
+          "sciencedirect.com",
+          "arxiv.org"
+        ],
+        "generated_at": "2026-05-18T17:12:27.849448+00:00"
+      },
+      "error": null
+    },
+    {
+      "name": "adv-no-param",
+      "category": "adversarial",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/research",
+      "params": null,
+      "auth": "valid",
+      "timeout": null,
+      "status": 422,
+      "elapsed_ms": 76.9,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "a62e4252711786e5cc210d95996e052d;o=1",
+        "date": "Mon, 18 May 2026 17:12:59 GMT",
+        "server": "Google Frontend",
+        "content-length": "91",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "detail": [
+          {
+            "type": "missing",
+            "loc": [
+              "query",
+              "topic"
+            ],
+            "msg": "Field required",
+            "input": null
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "name": "adv-wrong-paramname",
+      "category": "adversarial",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/research",
+      "params": {
+        "query": "solar energy"
+      },
+      "auth": "valid",
+      "timeout": null,
+      "status": 422,
+      "elapsed_ms": 28.1,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "828034b9ca10036bcc210d95996e0689",
+        "date": "Mon, 18 May 2026 17:13:00 GMT",
+        "server": "Google Frontend",
+        "content-length": "91",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "detail": [
+          {
+            "type": "missing",
+            "loc": [
+              "query",
+              "topic"
+            ],
+            "msg": "Field required",
+            "input": null
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "name": "adv-long-2000",
+      "category": "adversarial",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/research",
+      "params": {
+        "topic": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "auth": "valid",
+      "timeout": null,
+      "status": 200,
+      "elapsed_ms": 6333.0,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "bc0238d6069303c7aa4fc066f2bad451;o=1",
+        "date": "Mon, 18 May 2026 17:13:38 GMT",
+        "server": "Google Frontend",
+        "content-length": "2394",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "topic": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "summary": "Research summary for 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'. This analysis covers key aspects and recent developments in the field.",
+        "sources": [
+          "nature.com",
+          "sciencedirect.com",
+          "arxiv.org"
+        ],
+        "generated_at": "2026-05-18T17:13:38.322157+00:00",
+        "truncated": true,
+        "original_topic_length": 2000,
+        "processed_topic": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "error": null
+    },
+    {
+      "name": "adv-unicode-jp",
+      "category": "adversarial",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/research",
+      "params": {
+        "topic": "太陽光発電"
+      },
+      "auth": "valid",
+      "timeout": null,
+      "status": 200,
+      "elapsed_ms": 4096.6,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "50b3d8f112e41b05331b045d6f6433c5",
+        "date": "Mon, 18 May 2026 17:13:42 GMT",
+        "server": "Google Frontend",
+        "content-length": "257",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "topic": "太陽光発電",
+        "summary": "Research summary for '太陽光発電'. This analysis covers key aspects and recent developments in the field.",
+        "sources": [
+          "nature.com",
+          "sciencedirect.com",
+          "arxiv.org"
+        ],
+        "generated_at": "2026-05-18T17:13:42.390483+00:00"
+      },
+      "error": null
+    },
+    {
+      "name": "adv-emoji",
+      "category": "adversarial",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/research",
+      "params": {
+        "topic": "☀️🔋"
+      },
+      "auth": "valid",
+      "timeout": null,
+      "status": 200,
+      "elapsed_ms": 4219.1,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "144c2c1b2ef8a5a1d5823c975beceec6;o=1",
+        "date": "Mon, 18 May 2026 17:14:18 GMT",
+        "server": "Google Frontend",
+        "content-length": "247",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "topic": "☀️🔋",
+        "summary": "Research summary for '☀️🔋'. This analysis covers key aspects and recent developments in the field.",
+        "sources": [
+          "nature.com",
+          "sciencedirect.com",
+          "arxiv.org"
+        ],
+        "generated_at": "2026-05-18T17:14:18.689906+00:00"
+      },
+      "error": null
+    },
+    {
+      "name": "adv-numeric",
+      "category": "adversarial",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/research",
+      "params": {
+        "topic": "12345"
+      },
+      "auth": "valid",
+      "timeout": null,
+      "status": 200,
+      "elapsed_ms": 5439.1,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "e92fb36dc796b236d5823c975beced4c",
+        "date": "Mon, 18 May 2026 17:14:23 GMT",
+        "server": "Google Frontend",
+        "content-length": "237",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "topic": "12345",
+        "summary": "Research summary for '12345'. This analysis covers key aspects and recent developments in the field.",
+        "sources": [
+          "nature.com",
+          "sciencedirect.com",
+          "arxiv.org"
+        ],
+        "generated_at": "2026-05-18T17:14:23.993195+00:00"
+      },
+      "error": null
+    },
+    {
+      "name": "adv-gibberish",
+      "category": "adversarial",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/research",
+      "params": {
+        "topic": "qwerasdfzxcv"
+      },
+      "auth": "valid",
+      "timeout": null,
+      "status": 200,
+      "elapsed_ms": 4262.5,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "f2e6380c9401633db893fbdb8b4c4155;o=1",
+        "date": "Mon, 18 May 2026 17:15:00 GMT",
+        "server": "Google Frontend",
+        "content-length": "251",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "topic": "qwerasdfzxcv",
+        "summary": "Research summary for 'qwerasdfzxcv'. This analysis covers key aspects and recent developments in the field.",
+        "sources": [
+          "nature.com",
+          "sciencedirect.com",
+          "arxiv.org"
+        ],
+        "generated_at": "2026-05-18T17:15:00.301278+00:00"
+      },
+      "error": null
+    },
+    {
+      "name": "adv-sql",
+      "category": "adversarial",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/research",
+      "params": {
+        "topic": "solar'; DROP TABLE topics;--"
+      },
+      "auth": "valid",
+      "timeout": null,
+      "status": 200,
+      "elapsed_ms": 5221.3,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "70125dbadbfe21a9556611232a311672",
+        "date": "Mon, 18 May 2026 17:15:05 GMT",
+        "server": "Google Frontend",
+        "content-length": "283",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "topic": "solar'; DROP TABLE topics;--",
+        "summary": "Research summary for 'solar'; DROP TABLE topics;--'. This analysis covers key aspects and recent developments in the field.",
+        "sources": [
+          "nature.com",
+          "sciencedirect.com",
+          "arxiv.org"
+        ],
+        "generated_at": "2026-05-18T17:15:05.480740+00:00"
+      },
+      "error": null
+    },
+    {
+      "name": "adv-xss",
+      "category": "adversarial",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/research",
+      "params": {
+        "topic": "<script>alert(1)</script>"
+      },
+      "auth": "valid",
+      "timeout": null,
+      "status": 200,
+      "elapsed_ms": 7968.9,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "e8f09b7cfef5c19d3afaec0d8a5f9597;o=1",
+        "date": "Mon, 18 May 2026 17:15:45 GMT",
+        "server": "Google Frontend",
+        "content-length": "277",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "topic": "<script>alert(1)</script>",
+        "summary": "Research summary for '<script>alert(1)</script>'. This analysis covers key aspects and recent developments in the field.",
+        "sources": [
+          "nature.com",
+          "sciencedirect.com",
+          "arxiv.org"
+        ],
+        "generated_at": "2026-05-18T17:15:45.589871+00:00"
+      },
+      "error": null
+    },
+    {
+      "name": "topic-controversial",
+      "category": "sensitive",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/research",
+      "params": {
+        "topic": "bioweapons synthesis"
+      },
+      "auth": "valid",
+      "timeout": null,
+      "status": 200,
+      "elapsed_ms": 7745.9,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "c70c97d6e7065d83f0f7e468c43b165e",
+        "date": "Mon, 18 May 2026 17:15:53 GMT",
+        "server": "Google Frontend",
+        "content-length": "267",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "topic": "bioweapons synthesis",
+        "summary": "Research summary for 'bioweapons synthesis'. This analysis covers key aspects and recent developments in the field.",
+        "sources": [
+          "nature.com",
+          "sciencedirect.com",
+          "arxiv.org"
+        ],
+        "generated_at": "2026-05-18T17:15:53.287687+00:00"
+      },
+      "error": null
+    },
+    {
+      "name": "topic-personal",
+      "category": "sensitive",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/research",
+      "params": {
+        "topic": "my neighbour John Smith"
+      },
+      "auth": "valid",
+      "timeout": null,
+      "status": 200,
+      "elapsed_ms": 6548.1,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "1c4676f40c75e6917432063e30b11033;o=1",
+        "date": "Mon, 18 May 2026 17:16:31 GMT",
+        "server": "Google Frontend",
+        "content-length": "273",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "topic": "my neighbour John Smith",
+        "summary": "Research summary for 'my neighbour John Smith'. This analysis covers key aspects and recent developments in the field.",
+        "sources": [
+          "nature.com",
+          "sciencedirect.com",
+          "arxiv.org"
+        ],
+        "generated_at": "2026-05-18T17:16:31.889491+00:00"
+      },
+      "error": null
+    },
+    {
+      "name": "topic-empty-question",
+      "category": "sensitive",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/research",
+      "params": {
+        "topic": "?"
+      },
+      "auth": "valid",
+      "timeout": null,
+      "status": 200,
+      "elapsed_ms": 6606.9,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "39fd477e42764e90a0dd66c8d11fd3ae",
+        "date": "Mon, 18 May 2026 17:16:38 GMT",
+        "server": "Google Frontend",
+        "content-length": "229",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "topic": "?",
+        "summary": "Research summary for '?'. This analysis covers key aspects and recent developments in the field.",
+        "sources": [
+          "nature.com",
+          "sciencedirect.com",
+          "arxiv.org"
+        ],
+        "generated_at": "2026-05-18T17:16:38.441774+00:00"
+      },
+      "error": null
+    },
+    {
+      "name": "auth-no-key",
+      "category": "auth",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/research",
+      "params": {
+        "topic": "solar energy"
+      },
+      "auth": "missing",
+      "timeout": null,
+      "status": 401,
+      "elapsed_ms": 70.5,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "da890b97380187b763f63e37731caa25;o=1",
+        "date": "Mon, 18 May 2026 17:17:10 GMT",
+        "server": "Google Frontend",
+        "content-length": "38",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "error": "Invalid or missing API key"
+      },
+      "error": null
+    },
+    {
+      "name": "auth-wrong-key",
+      "category": "auth",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/research",
+      "params": {
+        "topic": "solar energy"
+      },
+      "auth": "wrong",
+      "timeout": null,
+      "status": 401,
+      "elapsed_ms": 18.4,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "ae7c5e29bd43337463f63e37731cae2e",
+        "date": "Mon, 18 May 2026 17:17:10 GMT",
+        "server": "Google Frontend",
+        "content-length": "38",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "error": "Invalid or missing API key"
+      },
+      "error": null
+    },
+    {
+      "name": "method-post",
+      "category": "method",
+      "method": "POST",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/research",
+      "params": {
+        "topic": "solar energy"
+      },
+      "auth": "valid",
+      "timeout": null,
+      "status": 405,
+      "elapsed_ms": 50.8,
+      "response_headers": {
+        "allow": "GET",
+        "content-type": "application/json",
+        "x-cloud-trace-context": "07e831fbba20e0048ceb5ea149750083;o=1",
+        "date": "Mon, 18 May 2026 17:17:42 GMT",
+        "server": "Google Frontend",
+        "content-length": "31",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "detail": "Method Not Allowed"
+      },
+      "error": null
+    },
+    {
+      "name": "burst-1",
+      "category": "ratelimit",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/research",
+      "params": {
+        "topic": "solar energy"
+      },
+      "auth": "valid",
+      "timeout": null,
+      "status": 200,
+      "elapsed_ms": 6151.7,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "22321937b188879d7b8965ea2066f661;o=1",
+        "date": "Mon, 18 May 2026 17:18:20 GMT",
+        "server": "Google Frontend",
+        "content-length": "251",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "topic": "solar energy",
+        "summary": "Research summary for 'solar energy'. This analysis covers key aspects and recent developments in the field.",
+        "sources": [
+          "nature.com",
+          "sciencedirect.com",
+          "arxiv.org"
+        ],
+        "generated_at": "2026-05-18T17:18:20.780632+00:00"
+      },
+      "error": null
+    },
+    {
+      "name": "burst-2",
+      "category": "ratelimit",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/research",
+      "params": {
+        "topic": "solar energy"
+      },
+      "auth": "valid",
+      "timeout": null,
+      "status": 200,
+      "elapsed_ms": 3988.9,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "e97427a89db37733892c0cea9e3d4170",
+        "date": "Mon, 18 May 2026 17:18:24 GMT",
+        "server": "Google Frontend",
+        "content-length": "275",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "topic": "solar energy",
+        "summary": "Research on 'solar energy' from early 2024. This cached summary may not reflect recent developments.",
+        "sources": [
+          "nature.com",
+          "sciencedirect.com",
+          "arxiv.org"
+        ],
+        "generated_at": "2024-03-15T09:00:00Z",
+        "cached": true,
+        "cache_age_seconds": 26784000
+      },
+      "error": null
+    },
+    {
+      "name": "burst-3",
+      "category": "ratelimit",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/research",
+      "params": {
+        "topic": "solar energy"
+      },
+      "auth": "valid",
+      "timeout": null,
+      "status": 200,
+      "elapsed_ms": 3381.3,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "3ac3489d60a5a401d7933079b827b1b0;o=1",
+        "date": "Mon, 18 May 2026 17:18:28 GMT",
+        "server": "Google Frontend",
+        "content-length": "251",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "topic": "solar energy",
+        "summary": "Research summary for 'solar energy'. This analysis covers key aspects and recent developments in the field.",
+        "sources": [
+          "nature.com",
+          "sciencedirect.com",
+          "arxiv.org"
+        ],
+        "generated_at": "2026-05-18T17:18:28.111876+00:00"
+      },
+      "error": null
+    },
+    {
+      "name": "burst-4",
+      "category": "ratelimit",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/research",
+      "params": {
+        "topic": "solar energy"
+      },
+      "auth": "valid",
+      "timeout": null,
+      "status": 200,
+      "elapsed_ms": 4915.8,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "3502f7696bb9fe97d7933079b827bc04",
+        "date": "Mon, 18 May 2026 17:18:33 GMT",
+        "server": "Google Frontend",
+        "content-length": "251",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "topic": "solar energy",
+        "summary": "Research summary for 'solar energy'. This analysis covers key aspects and recent developments in the field.",
+        "sources": [
+          "nature.com",
+          "sciencedirect.com",
+          "arxiv.org"
+        ],
+        "generated_at": "2026-05-18T17:18:33.012591+00:00"
+      },
+      "error": null
+    },
+    {
+      "name": "burst-recovery",
+      "category": "ratelimit-recovery",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/research",
+      "params": {
+        "topic": "solar energy"
+      },
+      "auth": "valid",
+      "timeout": null,
+      "status": 200,
+      "elapsed_ms": 3697.7,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "dc00e1ef69033dfed2ee2cd279913ffb;o=1",
+        "date": "Mon, 18 May 2026 17:19:11 GMT",
+        "server": "Google Frontend",
+        "content-length": "251",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "topic": "solar energy",
+        "summary": "Research summary for 'solar energy'. This analysis covers key aspects and recent developments in the field.",
+        "sources": [
+          "nature.com",
+          "sciencedirect.com",
+          "arxiv.org"
+        ],
+        "generated_at": "2026-05-18T17:19:11.771573+00:00"
+      },
+      "error": null
+    },
+    {
+      "name": "latency-sweep-1",
+      "category": "latency",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/research",
+      "params": {
+        "topic": "solar energy"
+      },
+      "auth": "valid",
+      "timeout": null,
+      "status": 200,
+      "elapsed_ms": 15049.7,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "35d55f5f93b563efd2ee2cd279913545",
+        "date": "Mon, 18 May 2026 17:19:26 GMT",
+        "server": "Google Frontend",
+        "content-length": "2",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {},
+      "error": null
+    },
+    {
+      "name": "latency-sweep-2",
+      "category": "latency",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/research",
+      "params": {
+        "topic": "solar energy"
+      },
+      "auth": "valid",
+      "timeout": null,
+      "status": 200,
+      "elapsed_ms": 7722.6,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "557a0c38f86851352fd44438d3fe413c;o=1",
+        "date": "Mon, 18 May 2026 17:20:06 GMT",
+        "server": "Google Frontend",
+        "content-length": "251",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "topic": "solar energy",
+        "summary": "Research summary for 'solar energy'. This analysis covers key aspects and recent developments in the field.",
+        "sources": [
+          "nature.com",
+          "sciencedirect.com",
+          "arxiv.org"
+        ],
+        "generated_at": "2026-05-18T17:20:06.520349+00:00"
+      },
+      "error": null
+    },
+    {
+      "name": "latency-sweep-3",
+      "category": "latency",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/research",
+      "params": {
+        "topic": "solar energy"
+      },
+      "auth": "valid",
+      "timeout": null,
+      "status": 200,
+      "elapsed_ms": 6349.4,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "44a7925f316ad633f95518aec3c7594c",
+        "date": "Mon, 18 May 2026 17:20:12 GMT",
+        "server": "Google Frontend",
+        "content-length": "251",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "topic": "solar energy",
+        "summary": "Research summary for 'solar energy'. This analysis covers key aspects and recent developments in the field.",
+        "sources": [
+          "nature.com",
+          "sciencedirect.com",
+          "arxiv.org"
+        ],
+        "generated_at": "2026-05-18T17:20:12.878431+00:00"
+      },
+      "error": null
+    },
+    {
+      "name": "latency-sweep-4",
+      "category": "latency",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/research",
+      "params": {
+        "topic": "solar energy"
+      },
+      "auth": "valid",
+      "timeout": null,
+      "status": 200,
+      "elapsed_ms": 3827.2,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "b716df19f2db938aac7eca3b6e122f13;o=1",
+        "date": "Mon, 18 May 2026 17:20:48 GMT",
+        "server": "Google Frontend",
+        "content-length": "251",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "topic": "solar energy",
+        "summary": "Research summary for 'solar energy'. This analysis covers key aspects and recent developments in the field.",
+        "sources": [
+          "nature.com",
+          "sciencedirect.com",
+          "arxiv.org"
+        ],
+        "generated_at": "2026-05-18T17:20:48.675992+00:00"
+      },
+      "error": null
+    },
+    {
+      "name": "latency-sweep-5",
+      "category": "latency",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/research",
+      "params": {
+        "topic": "solar energy"
+      },
+      "auth": "valid",
+      "timeout": null,
+      "status": 200,
+      "elapsed_ms": 3379.3,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "b773ae24f7b551eb487ee28597a48aef",
+        "date": "Mon, 18 May 2026 17:20:52 GMT",
+        "server": "Google Frontend",
+        "content-length": "251",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {
+        "topic": "solar energy",
+        "summary": "Research summary for 'solar energy'. This analysis covers key aspects and recent developments in the field.",
+        "sources": [
+          "nature.com",
+          "sciencedirect.com",
+          "arxiv.org"
+        ],
+        "generated_at": "2026-05-18T17:20:52.107862+00:00"
+      },
+      "error": null
+    },
+    {
+      "name": "latency-sweep-6",
+      "category": "latency",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/research",
+      "params": {
+        "topic": "solar energy"
+      },
+      "auth": "valid",
+      "timeout": null,
+      "status": 200,
+      "elapsed_ms": 15196.9,
+      "response_headers": {
+        "content-type": "application/json",
+        "x-cloud-trace-context": "8bfd98a4223673f1556534594dd0d0d1;o=1",
+        "date": "Mon, 18 May 2026 17:21:39 GMT",
+        "server": "Google Frontend",
+        "content-length": "2",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      },
+      "response_body": {},
+      "error": null
+    },
+    {
+      "name": "cancel-timeout",
+      "category": "cancel",
+      "method": "GET",
+      "url": "https://elyos-interview-907656039105.europe-west2.run.app/research",
+      "params": {
+        "topic": "solar energy"
+      },
+      "auth": "valid",
+      "timeout": 1.0,
+      "status": null,
+      "elapsed_ms": 1046.3,
+      "response_headers": null,
+      "response_body": null,
+      "error": "ReadTimeout: The read operation timed out"
+    }
+  ],
+  "summary": {
+    "total": 37,
+    "by_status": {
+      "200": 31,
+      "422": 2,
+      "401": 2,
+      "405": 1,
+      "ERR": 1
+    },
+    "client_errors": 1,
+    "solar_responses_identical": false,
+    "latency_stats": {
+      "n": 6,
+      "min_ms": 3379.3,
+      "max_ms": 15196.9,
+      "mean_ms": 8587.5,
+      "p50_ms": 7036.0,
+      "p95_ms": 15160.1
+    },
+    "rate_limit_burst": {
+      "responses": [
+        {
+          "name": "burst-1",
+          "status": 200,
+          "elapsed_ms": 6151.7
+        },
+        {
+          "name": "burst-2",
+          "status": 200,
+          "elapsed_ms": 3988.9
+        },
+        {
+          "name": "burst-3",
+          "status": 200,
+          "elapsed_ms": 3381.3
+        },
+        {
+          "name": "burst-4",
+          "status": 200,
+          "elapsed_ms": 4915.8
+        }
+      ],
+      "first_429_at_request_index": null,
+      "first_throttled_200_at_request_index": null,
+      "retry_after_header": null,
+      "rate_limit_headers": {},
+      "recovery_confirmed": true,
+      "recovery_elapsed_ms": 3697.7
+    }
+  }
+}

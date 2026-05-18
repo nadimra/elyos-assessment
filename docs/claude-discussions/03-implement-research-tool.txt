@@ -1,0 +1,536 @@
+╭─── Claude Code v2.1.143 ─────────────────────────────────────────────────────╮
+│                                                    │ What's new              │
+│                  Welcome back nad!                 │ Added plugin dependenc… │
+│                                                    │ Added projected contex… │
+│                      ▗ ▗   ▖ ▖                     │ Added `worktree.bgIsol… │
+│                                                    │ /release-notes for more │
+│                        ▘▘ ▝▝                       │                         │
+│ Opus 4.7 · Claude Max · nadimrahman98@gmail.com's  │                         │
+│ Organization                                       │                         │
+│               ~/src/elyos-assessment               │                         │
+╰──────────────────────────────────────────────────────────────────────────────╯
+
+❯ I now want to probe the research endpoint. I already probed the weather       
+  endpoint in https://github.com/nadimra/elyos-assessment/pull/2. I want to do  
+  the same for the research api, where I first create a test script, analyze    
+  the results, and then fill api-notes. The details of the endpoint can be      
+  found in interview.md.                                                        
+
+⏺ Explore(Explore research endpoint context)
+  ⎿  Done (16 tool uses · 35.2k tokens · 39s)
+  (ctrl+o to expand)
+
+  Read 3 files (ctrl+o to expand)
+
+⏺ I have a solid picture from the weather probe and interview.md. Let me write
+  the plan, then check one question with you before exiting.
+
+⏺ Updated plan
+  ⎿  /plan to preview
+
+⏺ User answered Claude's questions:
+  ⎿  · How aggressive should the research probe be on the slow-call axis? → Add 
+     latency-distribution sweep
+     · Include the sensitive-topic probes (bioweapons synthesis, named 
+     individual, lone '?')? → Include them
+
+⏺ Updating the plan to add the latency sweep and confirm sensitive probes are
+  in.
+
+⏺ Updated plan
+  ⎿  /plan to preview
+
+⏺ Updated plan
+  ⎿  /plan to preview
+
+⏺ Task tracking is for the implementation phase; planning fits the plan file.
+  Let me fix the call count and exit.
+
+⏺ Updated plan
+  ⎿  /plan to preview
+
+⏺ User approved Claude's plan
+  ⎿  Plan saved to: ~/.claude/plans/i-now-want-to-buzzing-flask.md · /plan to 
+     edit
+     Probe /research endpoint
+
+     Context
+
+     docs/interview.md exposes two APIs; PR #2 already probed /weather
+     (probes/probe_weather.py → probes/probe_weather_results.json) and filled
+     out the /weather section of docs/api-notes.md. The /research section of
+     that file is a skeleton (lines 114–123) and research_topic in main.py is
+     not yet implemented. Before implementing the tool, we want the same
+     evidence base: a systematic probe script, raw results, and a written-up
+     quirks list.
+
+     /research differs from /weather in ways the probe must account for:
+
+     - Latency 3–8 s per call (per docs) — total runtime is much longer, and
+     pacing needs to budget API time, not just sleep time.
+     - Free-form topic semantics rather than geocoded names — so the interesting
+      axes are topic length/shape, language, sensitivity, and response
+     variance/structure rather than ambiguous place names.
+     - The endpoint we most need to cancel from — so understanding latency
+     distribution and how the server behaves on client disconnect/timeout is
+     directly load-bearing for the implementation.
+
+     Approach
+
+     Create probes/probe_research.py modelled on probes/probe_weather.py:1 (same
+      probe() helper, batching, results envelope, KeyboardInterrupt-safe finally
+      write). Run it once, then write up findings into the /research section of
+     docs/api-notes.md.
+
+     Reused infrastructure from probe_weather.py
+
+     - _headers_for(auth) (probe_weather.py:44) — valid / missing / wrong
+     - probe(name, category, params, method, auth, pace) (probe_weather.py:54) —
+      same record schema (status, elapsed_ms, response_headers, response_body,
+     error)
+     - force_batch_break() (probe_weather.py:117) — clean window before the
+     burst
+     - write_results() summary (probe_weather.py:199) — by-status counter,
+     determinism check, burst summary
+     - client = httpx.Client(timeout=30.0) — needs to bump to ~60s since
+     research can take up to ~8s and we want headroom for slow/error cases. Set 
+     timeout=60.0.
+
+     Pacing tweak
+
+     Weather pacing is "3 requests per 32 s window". For research, each call
+     eats 3–8 s of that window. Worst case: 3 calls × 8 s = 24 s of API time
+     inside a 30 s window — already brushing the limit. Be more conservative:
+
+     - BATCH_SIZE = 2, BATCH_SLEEP = 32 — gives ~16 s slack inside the
+     rate-limit window even when all three calls hit the 8 s ceiling.
+     - Keep BURST_RECOVERY_SLEEP = 35.
+
+     Probe cases (~37 calls)
+
+     The categories mirror the weather probe but the contents are
+     research-specific.
+
+     Happy path (3) — broad topics likely well-formed in the server's response
+     template:
+     - solar energy (docs example)
+     - climate change
+     - quantum computing
+
+     Topic shape / formatting (6) — see how topic is parsed:
+     - case-upper: SOLAR ENERGY
+     - case-lower: solar energy
+     - ws-padded:  solar energy 
+     - plus-encoding: solar+energy (docs use ?topic=solar+energy — does + become
+      space, or literal +?)
+     - multi-word: the history of quantum computing in europe
+     - repeated-param: ["solar energy", "wind energy"] (last-wins like weather?)
+
+     Adversarial (10):
+     - adv-empty: ""
+     - adv-no-param: no params at all
+     - adv-wrong-paramname: {"query": "solar energy"}
+     - adv-long-2000: "a" * 2000 — way past any reasonable topic
+     - adv-unicode-jp: 太陽光発電
+     - adv-emoji: ☀️🔋
+     - adv-numeric: 12345
+     - adv-gibberish: qwerasdfzxcv
+     - adv-sql: solar'; DROP TABLE topics;--
+     - adv-xss: <script>alert(1)</script>
+
+     Sensitive / open-ended (3) — see if there's any content filter or refusal
+     envelope (relevant because the LLM will pass arbitrary user text through):
+     - topic-controversial: bioweapons synthesis
+     - topic-personal: my neighbour John Smith
+     - topic-empty-question: ?
+
+     Auth / method (3):
+     - auth-no-key
+     - auth-wrong-key
+     - method-post with topic=solar energy
+
+     Rate-limit burst (4) — fewer than weather (each call is slow, and we
+     already know the 200-with-throttled-body pattern from weather; we just want
+      to confirm it applies here too):
+     - 4 back-to-back calls with pace=False, then BURST_RECOVERY_SLEEP, then one
+      recovery call.
+
+     Latency / cancellation (7) — characterise the 3–8 s claim directly:
+     - latency-sweep-1..6: same topic (solar energy) called 6 times back-to-back
+      under normal pacing (not a burst — we want representative latencies, not
+     throttled ones). Feeds min/max/mean/p50/p95.
+     - cancel-timeout: one call with timeout=1.0, recording the ReadTimeout
+     exception. Mirrors what client-side cancellation will look like in
+     research_topic. Tagged in its own category so it doesn't pollute the
+     latency stats.
+
+     Note: latency-sweep-* doubles as additional determinism samples for solar 
+     energy, so the existing three determ-solar-* slots can be dropped —
+     comparison happens across all 7 sweep bodies instead.
+
+     Output
+
+     probes/probe_research_results.json, structurally identical to the weather
+     one, plus:
+     - latency_stats for happy-path 200s: min / max / mean / p50 / p95 in ms
+     - solar_responses_identical (analogous to london_responses_identical)
+     - Record the timeout case under its own category so write_results can list
+     it without skewing latency stats.
+
+     Files
+
+     - Create /Users/nad/src/elyos-assessment/probes/probe_research.py —
+     modelled on probes/probe_weather.py
+     - Generated
+     /Users/nad/src/elyos-assessment/probes/probe_research_results.json —
+     written by the script
+     - Edit /Users/nad/src/elyos-assessment/docs/api-notes.md — fill the three
+     empty subsections under ## /research (lines 117, 120, 123) using the
+     weather section (lines 10–112) as a tone/length template. Reuse the same
+     "Source data" sentence in api-notes.md:5 to point at the new probe file as
+     well.
+
+     Out of scope here: implementing research_topic in main.py — that's the next
+      PR, informed by what this probe finds.
+
+     Verification
+
+     1. python probes/probe_research.py — finishes without unhandled exceptions;
+      prints per-probe [ok |429|ERR] lines and a summary; even on
+     KeyboardInterrupt writes a partial probe_research_results.json (the finally
+      block in probe_weather.py:285 is the model).
+     2. jq '.summary' probes/probe_research_results.json — non-empty by_status,
+     populated latency_stats, rate_limit_burst.recovery_confirmed == true.
+     3. Eyeball probe_research_results.json for the determinism cases and at
+     least one 429-or-throttled-200 to confirm there's enough signal to write
+     the notes.
+     4. After writing docs/api-notes.md, re-read it: each quirk should cite a
+     specific probe name / response so the reader can trace it back to the JSON.
+
+⏺ Loading task tracker, then writing the probe script.
+
+⏺ Write(probes/probe_research.py)  ⎿  Wrote 362 lines to probes/probe_research.py
+       2 """Systematic probe of the /research endpoint.
+          path,ed on probes/probe_weather.py. Runs ~37 cases across happy
+       4 topic shape, adversarial inputs, sensitive topics, auth/method, 
+       5 rate-limit burst, a latency sweep (same topic ×6 to characterise
+          the
+         ationclaim), and a client-side timeout case (to see what cancell
+       8 looks like).
+       9 Pacing: 2 requests per ~32s window. Each /research call is 3–8s,
+      10 budget API time inside the rate-limit window more conservatively
+          than
+     … +406 lines (ctrl+o to expand)
+
+⏺ Running the probe in the background since it'll take ~10-12 minutes.
+
+  Listed 1 directory (ctrl+o to expand)
+
+⏺ Bash(.venv/bin/python probes/probe_research.py 2>&1)
+  ⎿  Running in the background (↓ to manage)
+
+⏺ Probe is running in the background. I'll wait for the completion notification.
+
+✻ Worked for 4m 13s
+
+⏺ Background command "Run the research endpoint probe" completed (exit code 0)
+
+  Read 1 file (ctrl+o to expand)
+
+  Read 11 files (ctrl+o to expand)
+
+⏺ Now writing up the findings into docs/api-notes.md.
+
+⏺ Update(docs/api-notes.md)
+  ⎿  Added 3 lines, removed 2 lines
+       2  
+       3  Observations and quirks discovered while integrating the weathe
+          r and research APIs.
+       4  
+       5 -Source data: `probes/probe_weather.py` (49 calls, broad survey)
+         -. Raw                                                          
+       6 -results in the matching `probe_weather_results.json` file.     
+       5 +Source data: `probes/probe_weather.py` (49 calls) and          
+       6 +`probes/probe_research.py` (37 calls), each broad surveys. Raw 
+         +results                                                        
+       7 +in the matching `probe_*_results.json` files alongside.        
+       8  
+       9  ## `/weather`
+      10  
+
+⏺ Update(docs/api-notes.md)
+  ⎿  Added 149 lines, removed 1 line
+      114  
+      115  ## `/research`
+      116  
+      117 -                                                              
+      117  ### Happy-path response
+      118  
+      119 +```                                                           
+      120 +GET /research?topic=solar%20energy                            
+      121 +X-API-Key: <key>                                              
+      122  
+      123 +200 OK                                                        
+      124 +{"topic": "solar energy",                                     
+      125 + "summary": "Research summary for 'solar energy'. This analysi
+          +s covers key aspects and recent developments in the field.",  
+      126 + "sources": ["nature.com", "sciencedirect.com", "arxiv.org"], 
+      127 + "generated_at": "2026-05-18T17:09:26.887011+00:00"}          
+      128 +```                                                           
+      129 +                                                              
+      130 +Latency claim in docs is 3–8 s. Observed across 6 back-to-back
+          + samples                                                      
+      131 +of `solar energy`: min 3.4 s, p50 7.0 s, p95 15.2 s, max 15.2 
+          +s                                                             
+      132 +(`summary.latency_stats`). Two of six samples landed ~15 s — a
+          +lmost 2×                                                      
+      133 +the documented ceiling — so the tool implementation must allow
+          + for                                                          
+      134 +tails well past 8 s and the user must be able to cancel.      
+      135 +                                                              
+      136 +`summary` is a templated string, not real research. The `topic
+          +` value                                                       
+      137 +is interpolated verbatim into both `topic` and `summary` field
+          +s with no                                                     
+      138 +sanitisation (see quirk 6).                                   
+      139 +                                                              
+      140  ### Critical quirks
+      141  
+      142 +1. **Cached-response envelope appears randomly.** A subset of 
+          +200s                                                          
+      143 +   come back with extra fields and a stale timestamp:         
+      144  
+      145 +   ```                                                        
+      146 +   {"topic": "solar energy",                                  
+      147 +    "summary": "Research on 'solar energy' from early 2024. Th
+          +is cached summary may not reflect recent developments.",      
+      148 +    "sources": [...],                                         
+      149 +    "generated_at": "2024-03-15T09:00:00Z",                   
+      150 +    "cached": true,                                           
+      151 +    "cache_age_seconds": 26784000}                            
+      152 +   ```                                                        
+      153 +                                                              
+      154 +   The same `topic=solar energy` returned the fresh shape on  
+      155 +   `happy-solar`, `burst-1`, `burst-3`, `burst-4`, `burst-reco
+          +very`, and                                                    
+      156 +   most `latency-sweep-*` calls — but the cached shape on `bur
+          +st-2` and                                                     
+      157 +   on `case-lower`. So it's **not** a property of the topic.  
+      158 +   `cache_age_seconds: 26784000` ≈ 310 days — i.e. the cache i
+          +s older                                                       
+      159 +   than the 2026-05-18 run by ~10 months. Treat the warning in
+          + the                                                          
+      160 +   `summary` text as load-bearing.                            
+      161 +                                                              
+      162 +2. **Whitespace padding produces an empty 200.** `topic="  sol
+          +ar energy  "`                                                 
+      163 +   returned `200 OK`, `content-length: 2`, body `{}` — no `top
+          +ic`, no                                                       
+      164 +   `summary`, no error envelope. And it took 15.0 s — the slow
+          +est                                                           
+      165 +   non-error response in the run. So `200 + parseable JSON` is
+          + **not**                                                      
+      166 +   sufficient to call this a success; check the body shape (`t
+          +opic`,                                                        
+      167 +   `summary` present) too.                                    
+      168 +                                                              
+      169 +3. **Topics over ~50 characters are silently truncated.** A 20
+          +00-char                                                       
+      170 +   `aaaa…` topic returned 200 with a truncation envelope:     
+      171 +                                                              
+      172 +   ```                                                        
+      173 +   {"topic": "aaa…" (echoed at original 2000 chars),          
+      174 +    "summary": "Research summary for 'aaa…'" (first 50 chars o
+          +nly),                                                         
+      175 +    "sources": [...],                                         
+      176 +    "generated_at": "...",                                    
+      177 +    "truncated": true,                                        
+      178 +    "original_topic_length": 2000,                            
+      179 +    "processed_topic": "aaaa… (50 chars)"}                    
+      180 +   ```                                                        
+      181 +                                                              
+      182 +   Unlike `/weather` (which 404s long inputs), `/research` acc
+          +epts them                                                     
+      183 +   but processes only the first 50 characters. The `topic` fie
+          +ld is                                                         
+      184 +   not truncated, so callers can't infer truncation from `topi
+          +c` alone                                                      
+      185 +   — they must check `truncated` / `processed_topic`.         
+      186 +                                                              
+      187 +4. **No rate limiting observed.** Four back-to-back calls to  
+      188 +   `/research` (the `burst-*` set, plus 8 other paced calls in
+          + the same                                                     
+      189 +   minute) all returned 200 with no `Retry-After` and no      
+      190 +   `status: "throttled"` body. Weather throttles at ~5 req/30s
+          +; either                                                      
+      191 +   `/research` has a far looser limit, or it shares a token bu
+          +cket with                                                     
+      192 +   weather that the slow 3–8 s calls naturally pace themselves
+          + under.                                                       
+      193 +   Treat the weather throttling pattern (`status: "throttled"`
+          + inside                                                       
+      194 +   a 200) as still possible here, but it didn't trigger in thi
+          +s run.                                                        
+      195 +                                                              
+      196 +5. **Three error body shapes — same set as `/weather`.**      
+      197 +                                                              
+      198 +   | Status | Body shape |                                    
+      199 +   |---|---|                                                  
+      200 +   | 401 | `{"error": "Invalid or missing API key"}` |        
+      201 +   | 405 | `{"detail": "Method Not Allowed"}` (string) |      
+      202 +   | 422 | `{"detail": [{"type", "loc", "msg", "input"}]}` (Fa
+          +stAPI/Pydantic) |                                             
+      203 +                                                              
+      204 +   Missing `topic` and wrong-paramname (`?query=…`) both hit 4
+          +22.                                                           
+      205 +                                                              
+      206 +6. **No input validation, no content filtering, verbatim echo.
+          +** The                                                        
+      207 +   server passes whatever `topic` it received straight into th
+          +e                                                             
+      208 +   templated `summary`. Probed:                               
+      209 +                                                              
+      210 +   - Empty string (`topic=""`) → 200 with `"Research summary f
+          +or ''."`                                                      
+      211 +   - Single `?` → 200, treated as a real topic                
+      212 +   - Numeric (`12345`), gibberish (`qwerasdfzxcv`), emoji (`☀️
+          +🔋`),                                                         
+      213 +     Japanese (`太陽光発電`) → 200, echoed verbatim           
+      214 +   - SQL-injection-looking (`solar'; DROP TABLE topics;--`),  
+      215 +     `<script>alert(1)</script>`, named individual            
+      216 +     (`my neighbour John Smith`), provocative (`bioweapons syn
+          +thesis`)                                                      
+      217 +     → 200, echoed verbatim into both `topic` and `summary`   
+      218 +                                                              
+      219 +   So `summary` is **not safe to render as HTML**, and there i
+          +s no                                                          
+      220 +   server-side moderation — content safety has to live in the 
+          +caller.                                                       
+      221 +                                                              
+      222 +7. **Topic is case-preserved, not normalised.** `SOLAR ENERGY`
+          +,                                                             
+      223 +   `solar energy`, and `solar+energy` (literal `+`, httpx perc
+          +ent-                                                          
+      224 +   encodes to `%2B`) each came back with the exact casing/punc
+          +tuation                                                       
+      225 +   echoed. Unlike `/weather`, the same topic in different case
+          +s is a                                                        
+      226 +   different cache key for the cached-envelope coin flip.     
+      227 +                                                              
+      228 +8. **Repeated `?topic=` params: last wins.** `?topic=solar%20e
+          +nergy&topic=wind%20energy`                                    
+      229 +   → `"topic": "wind energy"`. Same pattern as weather.       
+      230 +                                                              
+      231 +9. **Auth/method errors are fast.** 401 in 18–70 ms, 405 in 51
+          + ms, 422                                                      
+      232 +   in 28–77 ms. So malformed requests don't consume a 3–8 s bu
+          +dget —                                                        
+      233 +   safe to use as a config-check ping.                        
+      234 +                                                              
+      235 +10. **Client-side timeout surfaces as `httpx.ReadTimeout`.** S
+          +etting                                                        
+      236 +    `timeout=1.0` against a normal /research call raised      
+      237 +    `ReadTimeout: The read operation timed out` at ~1046 ms. T
+          +he                                                            
+      238 +    request is dispatched but we stop reading — `httpx` doesn'
+          +t tell us                                                     
+      239 +    whether the server completed the work, only that we gave u
+          +p.                                                            
+      240 +    Important for the cancellation path: `research_topic` must
+          + catch                                                        
+      241 +    `httpx.ReadTimeout` (and `httpx.RequestError` more broadly
+          +) and                                                         
+      242 +    return a structured `{"error": "cancelled" | "timeout"}` r
+          +ather                                                         
+      243 +    than raising into the tool-call loop.                     
+      244 +                                                              
+      245  ### Implications for the chat app
+      246  
+      247 +- **Validate shape, not just status.** `research_topic` should
+          + treat                                                        
+      248 +  `body.get("topic")` and `body.get("summary")` as required; i
+          +f either                                                      
+      249 +  is missing (the empty-200 case), return                     
+      250 +  `{"error": "research API returned an empty response"}` so th
+          +e LLM                                                         
+      251 +  can apologise rather than hallucinate over silence.         
+      252 +- **Surface truncation to the LLM.** If `body.get("truncated")
+          + is True`,                                                    
+      253 +  pass the envelope through unchanged — the `summary` already 
+          +cites                                                         
+      254 +  only the first 50 chars and the LLM can tell the user it onl
+          +y                                                             
+      255 +  researched part of their topic.                             
+      256 +- **Surface staleness to the LLM.** If `body.get("cached") is 
+          +True`,                                                        
+      257 +  keep the body intact; the `summary` text and `cache_age_seco
+          +nds`                                                          
+      258 +  already say "may not reflect recent developments" — let the 
+          +LLM                                                           
+      259 +  decide how to caveat.                                       
+      260 +- **Don't pre-parse the response shape.** Same rule as weather
+          +:                                                             
+      261 +  `json.dumps(result)` and let the LLM cope with `cached` /   
+      262 +  `truncated` / empty / standard shapes.                      
+      263 +- **Cancellation is the headline.** With p95 ≈ 15 s, well past
+          + the                                                          
+      264 +  documented 8 s ceiling, the cancel path is the most-exercise
+          +d tail.                                                       
+      265 +  Wrap the `httpx` call so `ReadTimeout` (and `asyncio.Cancell
+          +edError`                                                      
+      266 +  in the async version) cleanly produce a "cancelled" tool res
+          +ult                                                           
+      267 +  rather than crashing the streaming loop.                    
+      268 +- **Escape `summary` before rendering.** XSS payloads round-tr
+          +ip                                                            
+      269 +  verbatim into `summary`. If the chat output ever lands somew
+          +here                                                          
+      270 +  HTML-rendered, escape it. (The CLI is fine.)                
+      271 +- **No need to apply a length cap before sending.** Unlike wea
+          +ther,                                                         
+      272 +  `/research` accepts long topics and tells you it truncated —
+          + no                                                           
+      273 +  point duplicating server-side truncation in the client.     
+      274  
+      275  ## General
+
+⏺ Bash(git status; echo "---"; wc -l docs/api-notes.md probes/probe_research.py)
+  ⎿  On branch implement-research
+     Changes not staged for commit:
+       (use "git add <file>..." to update what will be committed)
+     … +14 lines (ctrl+o to expand)
+
+⏺ Done. Summary of what landed on the branch:
+
+  probes/probe_research.py — 37-case probe mirroring probe_weather.py: happy
+  path, topic-shape, adversarial, sensitive topics, auth/method, rate-limit
+  burst, 6-call latency sweep, and one timeout=1.0 cancel case. Pacing dropped
+  to 2/32s to budget for the 3–8 s call cost. Total runtime ~11 minutes.
+
+  probes/probe_research_results.json — raw bodies + summary; latency stats and
+  burst analysis populated.
+
+  docs/api-notes.md — /research section filled with happy-path shape, 10
+  numbered quirks, and 6 implications. The most consequential findings, each
+  traceable to a probe name in the JSON:
+
+  1. Cached-response envelope (cached: true, cache_age_seconds: ~310 days)
+  appears randomly even on solar energy — hit on burst-2 and case-lower.
+  2. Whitespace padding silently returns {} with 200 — the only "shape-failure"
+  case, and the slowest (15 s).
+  3. >50-char topics are silently truncated with a
+  truncated/processed_topic/original_topic_length envelope.
+  4. No rate limiting observed — 4 back-to-back calls all 200'd, contrary to
+  weather.
+  5. Latency p95 ≈ 15 s, nearly 2× the documented 8 s ceiling — cancellation is
+  the load-bearing path.
+  6. Zero input validation/moderation, verbatim echo of SQL/XSS/sensitive topics
+   into summary → XSS sink.
+  7. httpx.ReadTimeout is the cancellation signal to handle in research_topic.
+
+  Next PR is the research_topic implementation itself, informed by these
+  findings.
+
+✻ Baked for 2m 9s
+
+※ recap: Goal was to probe the /research endpoint the same way PR #2 probed /weather. The probe script ran, results are saved, and the /research section of docs/api-notes.md is filled in. Next action: review the diff and commit when ready. (disable recaps in /config)
