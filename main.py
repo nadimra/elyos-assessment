@@ -61,6 +61,39 @@ TOOLS = [
             "required": ["location"],
         },
     },
+        {
+        "name": "research_topic",
+        "description": (
+            "Research a topic in depth. Takes 3-15 seconds. Use only for "
+            "research-style asks, not for facts you already know well. "
+            "Only the 'summary' field is research content; the rest is metadata. "
+            "RESPOND IN THIS EXACT FORMAT: "
+            "'Our dedicated research API returned this summary: \"<verbatim "
+            "summary text>\".' Quote the summary verbatim — do not paraphrase, "
+            "condense, or rewrite it. "
+            "ONLY if the summary is genuinely insufficient for what the user "
+            "asked (too brief, or missing the specific aspect they asked about), "
+            "append a second paragraph starting EXACTLY with: 'Outside of the "
+            "research API, I found this information: ' followed by your own "
+            "knowledge. If the summary covers the question, do NOT add anything "
+            "beyond the quoted summary. "
+            "Never blend your own knowledge into the quoted summary or present "
+            "it as if it came from the research. "
+            "If 'cached': true, tell the user the info may be out of date. "
+            "For ambiguous topics ('football', 'mercury'), ASK the user to "
+            "clarify first — each call is slow and rate-limited."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "topic": {
+                    "type": "string",
+                    "description": "A specific, disambiguated topic to research.",
+                },
+            },
+            "required": ["topic"],
+        },
+    },
 ]
 
 async def get_user_input() -> str:
@@ -189,13 +222,36 @@ async def get_weather(location: str) -> dict:
     return body
 
 async def research_topic(topic: str) -> dict:
-    """Research a topic (3-8 seconds). Should be cancellable."""
-    pass
+    """Research a topic. 3-15s observed — timeout set above the worst case."""
+    try:
+        async with httpx.AsyncClient(timeout=30) as http:
+            r = await http.get(
+                f"{ELYOS_BASE}/research",
+                params={"topic": topic},
+                headers={"X-API-Key": ELYOS_API_KEY},
+            )
+        body = r.json()
+    except Exception as e:
+        return {"error": f"research API failed: {type(e).__name__}"}
+    # Shared throttle envelope with /weather.
+    if isinstance(body, dict) and body.get("status") == "throttled":
+        return {
+            "error": "rate limited",
+            "retry_after_seconds": body.get("retry_after_seconds", 30),
+        }
+    # Empty {} is a third variant — server returned nothing. Surface as error.
+    if isinstance(body, dict) and not body:
+        return {"error": "empty response from research API"}
+    # Sources are fake-fixed; strip so the LLM doesn't quote them as citations.
+    if isinstance(body, dict):
+        body.pop("sources", None)
+    return body
 
-TOOL_FUNCS = {"get_weather": get_weather}
+TOOL_FUNCS = {"get_weather": get_weather, "research_topic": research_topic}
 
 TOOL_STATUS = {
     "get_weather": lambda args: f"Looking up weather in {args.get('location', '?')}...",
+    "research_topic": lambda args: f"Researching {args.get('topic', '?')}... (CTRL+C to cancel)",
 }
 
 async def main():
