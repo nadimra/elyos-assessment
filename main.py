@@ -81,16 +81,21 @@ async def call_llm(user_input: str, conversation_history: list):
             conversation_history.append({"role": "assistant", "content": final.content})
             return
         
+        tool_blocks = [b for b in final.content if b.type == "tool_use"]
         tool_results = []
-        for block in final.content:
-            if block.type != "tool_use":
-                continue
-            yield ("status", TOOL_STATUS[block.name](block.input))
-            result = await TOOL_FUNCS[block.name](**block.input)
-            yield ("clear_status",)
+
+        for b in tool_blocks:
+            yield ("status_add", b.id, TOOL_STATUS[b.name](b.input))
+
+        results = await asyncio.gather(
+            *[TOOL_FUNCS[b.name](**b.input) for b in tool_blocks]
+        )
+
+        for b, result in zip(tool_blocks, results):
+            yield ("status_remove", b.id)
             tool_results.append({
                 "type": "tool_result",
-                "tool_use_id": block.id,
+                "tool_use_id": b.id,
                 "content": json.dumps(result),
                 "is_error": isinstance(result, dict) and "error" in result,
             })
@@ -100,7 +105,7 @@ async def call_llm(user_input: str, conversation_history: list):
 
 async def stream_response(user_input: str, conversation_history: list, voice: bool = False):
     chunks: list[str] = []
-    status_text: str | None = None
+    statuses: dict[str, str] = {}
     try:
         with Live(console=console, refresh_per_second=15) as live:
             def render():
@@ -108,17 +113,17 @@ async def stream_response(user_input: str, conversation_history: list, voice: bo
                 text = "".join(chunks)
                 if text:
                     parts.append(Markdown(text))
-                if status_text is not None:
-                    parts.append(Spinner("dots", text=status_text, style="yellow"))
+                for msg in statuses.values():
+                    parts.append(Spinner("dots", text=msg, style="yellow"))
                 return Group(*parts)
 
             async for event in call_llm(user_input, conversation_history):
                 if isinstance(event, str):
                     chunks.append(event)
-                elif event[0] == "status":
-                    status_text = event[1]
-                elif event[0] == "clear_status":
-                    status_text = None
+                elif event[0] == "status_add":
+                    statuses[event[1]] = event[2]
+                elif event[0] == "status_remove":
+                    statuses.pop(event[1], None)
                 live.update(render())
         print()
         if voice and chunks:
