@@ -98,12 +98,10 @@ async def call_llm(user_input: str, conversation_history: list):
         conversation_history.append({"role": "user", "content": tool_results})
 
 
-async def stream_response(user_input: str, conversation_history: list):
+async def stream_response(user_input: str, conversation_history: list, voice: bool = False):
     chunks: list[str] = []
     status_text: str | None = None
     try:
-        # Live re-renders the chunks list as markdown; a Spinner overlay
-        # appears alongside while a "status" event is active.
         with Live(console=console, refresh_per_second=15) as live:
             def render():
                 parts = []
@@ -123,6 +121,9 @@ async def stream_response(user_input: str, conversation_history: list):
                     status_text = None
                 live.update(render())
         print()
+        if voice and chunks:
+            from voice import speak
+            await speak("".join(chunks))
     except asyncio.CancelledError:
         # Preserve the cancelled turn so follow-ups have context.
         # call_llm always commits user before streaming and assistant+tool_results
@@ -361,9 +362,14 @@ async def main():
             break
 
         print()
-        active_task = asyncio.create_task(
-            stream_response(user_input, conversation_history)
-        )
+        if args.voice:
+            active_task = asyncio.create_task(
+                stream_response(user_input, conversation_history, voice=True)
+            )
+        else:
+            active_task = asyncio.create_task(
+                stream_response(user_input, conversation_history)
+            ) 
         try:
             await active_task
         except asyncio.CancelledError:

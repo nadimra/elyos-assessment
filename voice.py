@@ -3,8 +3,14 @@ import json
 import os
 import pyaudio
 import websockets
+from elevenlabs.client import ElevenLabs
+from elevenlabs import stream
 
 DEEPGRAM_API_KEY = os.environ["DEEPGRAM_API_KEY"]
+ELEVENLABS_API_KEY = os.environ["ELEVENLABS_API_KEY"]
+ELEVENLABS_VOICE_ID = os.environ.get("ELEVENLABS_VOICE_ID", "JBFqnCBsd6RMkjVDRZzb")  # "George" — free tier
+
+_el = ElevenLabs(api_key=ELEVENLABS_API_KEY)
 
 FORMAT = pyaudio.paInt16
 CHANNELS = 1
@@ -88,3 +94,16 @@ async def get_voice_input() -> str:
     print()
     # print(f"\033[1;36mYou\033[0m › {result}")
     return result
+
+
+async def speak(text: str) -> None:
+    """Stream text to ElevenLabs TTS and play via ffplay."""
+    if not text.strip():
+        return
+
+    audio_stream = _el.text_to_speech.stream(
+        voice_id=ELEVENLABS_VOICE_ID,
+        text=text,
+        model_id="eleven_turbo_v2_5",
+    )
+    await asyncio.to_thread(stream, audio_stream)
