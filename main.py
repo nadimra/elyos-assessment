@@ -19,6 +19,10 @@ load_dotenv()
 
 MODEL = "claude-sonnet-4-6"
 MAX_TOKENS = 1024
+CONTEXT_LIMIT      = 200_000
+COMPRESS_THRESHOLD = 80_000
+KEEP_RECENT        = 10
+SUMMARY_MAX_TOKENS = 512
 console = Console()
 
 client = AsyncAnthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
@@ -62,9 +66,72 @@ async def get_user_input() -> str:
         loop.remove_reader(sys.stdin.fileno())
         raise
 
-async def call_llm(user_input: str, conversation_history: list):
+def find_split_point(history: list, keep_recent: int) -> int:
+    """Return the highest index that is a clean user-text boundary with >= keep_recent messages after it."""
+    for i in range(len(history) - keep_recent, 0, -1):
+        msg = history[i]
+        if msg["role"] == "user" and isinstance(msg["content"], str):
+            return i
+    return 0
+
+
+def _msg_to_text(msg: dict) -> str:
+    role = msg["role"]
+    c = msg["content"]
+    if isinstance(c, str):
+        return f"{role}: {c}"
+    parts = []
+    for block in c:
+        if isinstance(block, dict):
+            t = block.get("type", "")
+        else:
+            t = getattr(block, "type", "")
+        if t == "text":
+            text = block["text"] if isinstance(block, dict) else block.text
+            parts.append(text)
+        elif t == "tool_use":
+            name = block.get("name") if isinstance(block, dict) else block.name
+            parts.append(f"[called tool: {name}]")
+        elif t == "tool_result":
+            parts.append("[tool result]")
+    return f"{role}: " + " ".join(parts)
+
+
+async def maybe_compress_history(history: list, max_context: int) -> None:
+    if len(history) < KEEP_RECENT + 2:
+        return
+    count = await client.messages.count_tokens(model=MODEL, messages=history, tools=TOOLS)
+    threshold = int(max_context * 0.4)
+    if count.input_tokens <= threshold:
+        return
+    split = find_split_point(history, KEEP_RECENT)
+    if split == 0:
+        return
+    console.print(f"[yellow]Context at {count.input_tokens:,} tokens — summarizing older conversation…[/yellow]")
+    transcript = "\n".join(_msg_to_text(m) for m in history[:split])
+    resp = await client.messages.create(
+        model=MODEL,
+        max_tokens=SUMMARY_MAX_TOKENS,
+        messages=[{
+            "role": "user",
+            "content": (
+                "Summarize the following conversation concisely, preserving "
+                "all important facts, decisions, and context:\n\n" + transcript
+            ),
+        }],
+    )
+    summary = resp.content[0].text
+    history[:split] = [
+        {"role": "user",      "content": f"[Earlier conversation summary]: {summary}"},
+        {"role": "assistant", "content": "Understood. I have the earlier context."},
+    ]
+    console.print(f"[dim]Compressed {split} messages → 2. History now {len(history)} messages.[/dim]")
+
+
+async def call_llm(user_input: str, conversation_history: list, max_context: int = CONTEXT_LIMIT):
     """Send input to LLM, yield streaming text deltas, update history."""
     conversation_history.append({"role": "user", "content": user_input})
+    await maybe_compress_history(conversation_history, max_context)
 
     while True:
         async with client.messages.stream(
@@ -103,7 +170,7 @@ async def call_llm(user_input: str, conversation_history: list):
         conversation_history.append({"role": "user", "content": tool_results})
 
 
-async def stream_response(user_input: str, conversation_history: list, voice: bool = False):
+async def stream_response(user_input: str, conversation_history: list, voice: bool = False, max_context: int = CONTEXT_LIMIT):
     chunks: list[str] = []
     statuses: dict[str, str] = {}
     try:
@@ -117,7 +184,7 @@ async def stream_response(user_input: str, conversation_history: list, voice: bo
                     parts.append(Spinner("dots", text=msg, style="yellow"))
                 return Group(*parts)
 
-            async for event in call_llm(user_input, conversation_history):
+            async for event in call_llm(user_input, conversation_history, max_context=max_context):
                 if isinstance(event, str):
                     chunks.append(event)
                 elif event[0] == "status_add":
@@ -337,6 +404,8 @@ async def main():
 
     parser = argparse.ArgumentParser(description='Optional app description')
     parser.add_argument('--voice', action=argparse.BooleanOptionalAction)
+    parser.add_argument('--max-context', type=int, default=CONTEXT_LIMIT, metavar='TOKENS',
+                        help='Override context window size (default: 200000). Use a low value to test compression.')
     args = parser.parse_args()
 
     def on_sigint():
@@ -369,12 +438,12 @@ async def main():
         print()
         if args.voice:
             active_task = asyncio.create_task(
-                stream_response(user_input, conversation_history, voice=True)
+                stream_response(user_input, conversation_history, voice=True, max_context=args.max_context)
             )
         else:
             active_task = asyncio.create_task(
-                stream_response(user_input, conversation_history)
-            ) 
+                stream_response(user_input, conversation_history, max_context=args.max_context)
+            )
         try:
             await active_task
         except asyncio.CancelledError:
