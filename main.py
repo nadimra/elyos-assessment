@@ -1,3 +1,4 @@
+import argparse
 import asyncio
 import os
 import time
@@ -50,7 +51,6 @@ async def get_user_input() -> str:
 
     def _on_readable():
         loop.remove_reader(sys.stdin.fileno())
-        print("hi")
         if not future.done():
             future.set_result(sys.stdin.readline().strip())
 
@@ -329,6 +329,10 @@ async def main():
     loop = asyncio.get_running_loop()
     active_task: asyncio.Task | None = None
 
+    parser = argparse.ArgumentParser(description='Optional app description')
+    parser.add_argument('--voice', action=argparse.BooleanOptionalAction)
+    args = parser.parse_args()
+
     def on_sigint():
         if active_task and not active_task.done():
             active_task.cancel()
@@ -338,8 +342,14 @@ async def main():
     # Mutable list — call_llm mutates in place so history persists across turns.
     conversation_history = []
 
+    if args.voice:
+        from voice import get_voice_input
+
     while True:
-        active_task = asyncio.create_task(get_user_input())
+        if args.voice:
+            active_task = asyncio.create_task(get_voice_input())
+        else:
+            active_task = asyncio.create_task(get_user_input())
         try:
             user_input = await active_task
         except asyncio.CancelledError:
