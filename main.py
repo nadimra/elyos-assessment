@@ -1,8 +1,10 @@
 import asyncio
 import os
+import time
 import signal
 import sys
 import json
+import random
 
 import httpx
 from rich.console import Console, Group
@@ -48,6 +50,7 @@ async def get_user_input() -> str:
 
     def _on_readable():
         loop.remove_reader(sys.stdin.fileno())
+        print("hi")
         if not future.done():
             future.set_result(sys.stdin.readline().strip())
 
@@ -84,16 +87,6 @@ async def call_llm(user_input: str, conversation_history: list):
                 continue
             yield ("status", TOOL_STATUS[block.name](block.input))
             result = await TOOL_FUNCS[block.name](**block.input)
-            attempt = 0
-            while (isinstance(result, dict)
-                   and result.get("error") == "rate limited"
-                   and attempt < 2):
-                wait = int(result.get("retry_after_seconds", 30)) + 1
-                yield ("status", f"Waiting for all results... (CTRL+C to cancel)")
-                await asyncio.sleep(wait)
-                yield ("status", TOOL_STATUS[block.name](block.input))
-                result = await TOOL_FUNCS[block.name](**block.input)
-                attempt += 1
             yield ("clear_status",)
             tool_results.append({
                 "type": "tool_result",
@@ -184,6 +177,9 @@ async def stream_response(user_input: str, conversation_history: list):
 )
 async def get_weather(location: str) -> dict:
     """Fetch weather from API (~200ms typical)."""
+    return await call_with_retry(lambda: _get_weather_once(location))
+
+async def _get_weather_once(location: str) -> dict:
     try:
         async with httpx.AsyncClient(timeout=10) as http:
             r = await http.get(
@@ -192,6 +188,8 @@ async def get_weather(location: str) -> dict:
                 headers={"X-API-Key": ELYOS_API_KEY},
             )
         body = r.json()
+    except RETRYABLE_EXCEPTIONS:
+        raise
     except Exception as e:
         return {"error": f"weather API failed: {type(e).__name__}"}
     # Throttle hits come back HTTP 200 with envelope — see docs/api-notes.md.
@@ -238,6 +236,9 @@ async def get_weather(location: str) -> dict:
 )
 async def research_topic(topic: str) -> dict:
     """Research a topic. 3-15s observed — timeout set above the worst case."""
+    return await call_with_retry(lambda: _research_topic_once(topic))
+
+async def _research_topic_once(topic: str) -> dict:
     try:
         async with httpx.AsyncClient(timeout=30) as http:
             r = await http.get(
@@ -246,6 +247,8 @@ async def research_topic(topic: str) -> dict:
                 headers={"X-API-Key": ELYOS_API_KEY},
             )
         body = r.json()
+    except RETRYABLE_EXCEPTIONS:
+        raise
     except Exception as e:
         return {"error": f"research API failed: {type(e).__name__}"}
     # Shared throttle envelope with /weather.
@@ -261,6 +264,63 @@ async def research_topic(topic: str) -> dict:
     if isinstance(body, dict):
         body.pop("sources", None)
     return body
+
+RETRYABLE_EXCEPTIONS = (
+    httpx.ConnectError,
+    httpx.ReadTimeout,
+    httpx.RemoteProtocolError,
+)
+
+class RateLimitManager:
+    def __init__(self):
+        self._blocked_until = 0.0
+        self._lock = asyncio.Lock()
+
+    async def wait_if_needed(self):
+        while True:
+            delay = self._blocked_until - time.monotonic()
+            if delay <= 0:
+                return
+            await asyncio.sleep(delay)
+
+    async def throttle(self, retry_after: float):
+        async with self._lock:
+            self._blocked_until = max(
+                self._blocked_until,
+                time.monotonic() + retry_after,
+            )
+
+rate_limit = RateLimitManager()
+
+async def call_with_retry(
+    fn,
+    *,
+    max_attempts: int = 3,
+    base_delay: float = 0.5,
+    max_delay: float = 30.0,
+):
+    last_err = None
+    for attempt in range(max_attempts):
+        await rate_limit.wait_if_needed()
+        try:
+            result = await fn()
+        except RETRYABLE_EXCEPTIONS as e:
+            last_err = e
+            if attempt < max_attempts - 1:
+                await asyncio.sleep(backoff(attempt, base_delay, max_delay))
+            continue
+
+        if not (isinstance(result, dict) and result.get("error") == "rate limited"):
+            return result
+
+        last_err = "rate limited"
+        if attempt < max_attempts - 1:
+            await rate_limit.throttle(result.get("retry_after_seconds") or 0)
+
+    return {"error": f"failed after {max_attempts} attempts: {last_err}"}
+            
+def backoff(attempt:int, base: float, cap: float):
+    return min(cap, random.uniform(0,base* 2**attempt))
 
 async def main():
     # asyncio.run's SIGINT handler counts cumulative Ctrl+Cs and raises
