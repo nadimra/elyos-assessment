@@ -1,3 +1,5 @@
 anthropic
 python-dotenv
 rich
+deepgram-sdk
+pyaudio

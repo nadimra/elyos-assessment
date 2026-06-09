@@ -1,8 +1,11 @@
+import argparse
 import asyncio
 import os
+import time
 import signal
 import sys
 import json
+import random
 
 import httpx
 from rich.console import Console, Group
@@ -16,6 +19,10 @@ load_dotenv()
 
 MODEL = "claude-sonnet-4-6"
 MAX_TOKENS = 1024
+CONTEXT_LIMIT      = 200_000
+COMPRESS_THRESHOLD = 80_000
+KEEP_RECENT        = 10
+SUMMARY_MAX_TOKENS = 512
 console = Console()
 
 client = AsyncAnthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
@@ -59,9 +66,72 @@ async def get_user_input() -> str:
         loop.remove_reader(sys.stdin.fileno())
         raise
 
-async def call_llm(user_input: str, conversation_history: list):
+def find_split_point(history: list, keep_recent: int) -> int:
+    """Return the highest index that is a clean user-text boundary with >= keep_recent messages after it."""
+    for i in range(len(history) - keep_recent, 0, -1):
+        msg = history[i]
+        if msg["role"] == "user" and isinstance(msg["content"], str):
+            return i
+    return 0
+
+
+def _msg_to_text(msg: dict) -> str:
+    role = msg["role"]
+    c = msg["content"]
+    if isinstance(c, str):
+        return f"{role}: {c}"
+    parts = []
+    for block in c:
+        if isinstance(block, dict):
+            t = block.get("type", "")
+        else:
+            t = getattr(block, "type", "")
+        if t == "text":
+            text = block["text"] if isinstance(block, dict) else block.text
+            parts.append(text)
+        elif t == "tool_use":
+            name = block.get("name") if isinstance(block, dict) else block.name
+            parts.append(f"[called tool: {name}]")
+        elif t == "tool_result":
+            parts.append("[tool result]")
+    return f"{role}: " + " ".join(parts)
+
+
+async def maybe_compress_history(history: list, max_context: int) -> None:
+    if len(history) < KEEP_RECENT + 2:
+        return
+    count = await client.messages.count_tokens(model=MODEL, messages=history, tools=TOOLS)
+    threshold = int(max_context * 0.4)
+    if count.input_tokens <= threshold:
+        return
+    split = find_split_point(history, KEEP_RECENT)
+    if split == 0:
+        return
+    console.print(f"[yellow]Context at {count.input_tokens:,} tokens — summarizing older conversation…[/yellow]")
+    transcript = "\n".join(_msg_to_text(m) for m in history[:split])
+    resp = await client.messages.create(
+        model=MODEL,
+        max_tokens=SUMMARY_MAX_TOKENS,
+        messages=[{
+            "role": "user",
+            "content": (
+                "Summarize the following conversation concisely, preserving "
+                "all important facts, decisions, and context:\n\n" + transcript
+            ),
+        }],
+    )
+    summary = resp.content[0].text
+    history[:split] = [
+        {"role": "user",      "content": f"[Earlier conversation summary]: {summary}"},
+        {"role": "assistant", "content": "Understood. I have the earlier context."},
+    ]
+    console.print(f"[dim]Compressed {split} messages → 2. History now {len(history)} messages.[/dim]")
+
+
+async def call_llm(user_input: str, conversation_history: list, max_context: int = CONTEXT_LIMIT):
     """Send input to LLM, yield streaming text deltas, update history."""
     conversation_history.append({"role": "user", "content": user_input})
+    await maybe_compress_history(conversation_history, max_context)
 
     while True:
         async with client.messages.stream(
@@ -78,26 +148,21 @@ async def call_llm(user_input: str, conversation_history: list):
             conversation_history.append({"role": "assistant", "content": final.content})
             return
         
+        tool_blocks = [b for b in final.content if b.type == "tool_use"]
         tool_results = []
-        for block in final.content:
-            if block.type != "tool_use":
-                continue
-            yield ("status", TOOL_STATUS[block.name](block.input))
-            result = await TOOL_FUNCS[block.name](**block.input)
-            attempt = 0
-            while (isinstance(result, dict)
-                   and result.get("error") == "rate limited"
-                   and attempt < 2):
-                wait = int(result.get("retry_after_seconds", 30)) + 1
-                yield ("status", f"Waiting for all results... (CTRL+C to cancel)")
-                await asyncio.sleep(wait)
-                yield ("status", TOOL_STATUS[block.name](block.input))
-                result = await TOOL_FUNCS[block.name](**block.input)
-                attempt += 1
-            yield ("clear_status",)
+
+        for b in tool_blocks:
+            yield ("status_add", b.id, TOOL_STATUS[b.name](b.input))
+
+        results = await asyncio.gather(
+            *[TOOL_FUNCS[b.name](**b.input) for b in tool_blocks]
+        )
+
+        for b, result in zip(tool_blocks, results):
+            yield ("status_remove", b.id)
             tool_results.append({
                 "type": "tool_result",
-                "tool_use_id": block.id,
+                "tool_use_id": b.id,
                 "content": json.dumps(result),
                 "is_error": isinstance(result, dict) and "error" in result,
             })
@@ -105,31 +170,32 @@ async def call_llm(user_input: str, conversation_history: list):
         conversation_history.append({"role": "user", "content": tool_results})
 
 
-async def stream_response(user_input: str, conversation_history: list):
+async def stream_response(user_input: str, conversation_history: list, voice: bool = False, max_context: int = CONTEXT_LIMIT):
     chunks: list[str] = []
-    status_text: str | None = None
+    statuses: dict[str, str] = {}
     try:
-        # Live re-renders the chunks list as markdown; a Spinner overlay
-        # appears alongside while a "status" event is active.
         with Live(console=console, refresh_per_second=15) as live:
             def render():
                 parts = []
                 text = "".join(chunks)
                 if text:
                     parts.append(Markdown(text))
-                if status_text is not None:
-                    parts.append(Spinner("dots", text=status_text, style="yellow"))
+                for msg in statuses.values():
+                    parts.append(Spinner("dots", text=msg, style="yellow"))
                 return Group(*parts)
 
-            async for event in call_llm(user_input, conversation_history):
+            async for event in call_llm(user_input, conversation_history, max_context=max_context):
                 if isinstance(event, str):
                     chunks.append(event)
-                elif event[0] == "status":
-                    status_text = event[1]
-                elif event[0] == "clear_status":
-                    status_text = None
+                elif event[0] == "status_add":
+                    statuses[event[1]] = event[2]
+                elif event[0] == "status_remove":
+                    statuses.pop(event[1], None)
                 live.update(render())
         print()
+        if voice and chunks:
+            from voice import speak
+            await speak("".join(chunks))
     except asyncio.CancelledError:
         # Preserve the cancelled turn so follow-ups have context.
         # call_llm always commits user before streaming and assistant+tool_results
@@ -184,6 +250,9 @@ async def stream_response(user_input: str, conversation_history: list):
 )
 async def get_weather(location: str) -> dict:
     """Fetch weather from API (~200ms typical)."""
+    return await call_with_retry(lambda: _get_weather_once(location))
+
+async def _get_weather_once(location: str) -> dict:
     try:
         async with httpx.AsyncClient(timeout=10) as http:
             r = await http.get(
@@ -192,6 +261,8 @@ async def get_weather(location: str) -> dict:
                 headers={"X-API-Key": ELYOS_API_KEY},
             )
         body = r.json()
+    except RETRYABLE_EXCEPTIONS:
+        raise
     except Exception as e:
         return {"error": f"weather API failed: {type(e).__name__}"}
     # Throttle hits come back HTTP 200 with envelope — see docs/api-notes.md.
@@ -238,6 +309,9 @@ async def get_weather(location: str) -> dict:
 )
 async def research_topic(topic: str) -> dict:
     """Research a topic. 3-15s observed — timeout set above the worst case."""
+    return await call_with_retry(lambda: _research_topic_once(topic))
+
+async def _research_topic_once(topic: str) -> dict:
     try:
         async with httpx.AsyncClient(timeout=30) as http:
             r = await http.get(
@@ -246,6 +320,8 @@ async def research_topic(topic: str) -> dict:
                 headers={"X-API-Key": ELYOS_API_KEY},
             )
         body = r.json()
+    except RETRYABLE_EXCEPTIONS:
+        raise
     except Exception as e:
         return {"error": f"research API failed: {type(e).__name__}"}
     # Shared throttle envelope with /weather.
@@ -262,12 +338,75 @@ async def research_topic(topic: str) -> dict:
         body.pop("sources", None)
     return body
 
+RETRYABLE_EXCEPTIONS = (
+    httpx.ConnectError,
+    httpx.ReadTimeout,
+    httpx.RemoteProtocolError,
+)
+
+class RateLimitManager:
+    def __init__(self):
+        self._blocked_until = 0.0
+        self._lock = asyncio.Lock()
+
+    async def wait_if_needed(self):
+        while True:
+            delay = self._blocked_until - time.monotonic()
+            if delay <= 0:
+                return
+            await asyncio.sleep(delay)
+
+    async def throttle(self, retry_after: float):
+        async with self._lock:
+            self._blocked_until = max(
+                self._blocked_until,
+                time.monotonic() + retry_after,
+            )
+
+rate_limit = RateLimitManager()
+
+async def call_with_retry(
+    fn,
+    *,
+    max_attempts: int = 3,
+    base_delay: float = 0.5,
+    max_delay: float = 30.0,
+):
+    last_err = None
+    for attempt in range(max_attempts):
+        await rate_limit.wait_if_needed()
+        try:
+            result = await fn()
+        except RETRYABLE_EXCEPTIONS as e:
+            last_err = e
+            if attempt < max_attempts - 1:
+                await asyncio.sleep(backoff(attempt, base_delay, max_delay))
+            continue
+
+        if not (isinstance(result, dict) and result.get("error") == "rate limited"):
+            return result
+
+        last_err = "rate limited"
+        if attempt < max_attempts - 1:
+            await rate_limit.throttle(result.get("retry_after_seconds") or 0)
+
+    return {"error": f"failed after {max_attempts} attempts: {last_err}"}
+            
+def backoff(attempt:int, base: float, cap: float):
+    return min(cap, random.uniform(0,base* 2**attempt))
+
 async def main():
     # asyncio.run's SIGINT handler counts cumulative Ctrl+Cs and raises
     # KeyboardInterrupt out of the loop on the 2nd one, exiting the program.
     # Install our own handler so only the in-flight task is cancelled.
     loop = asyncio.get_running_loop()
     active_task: asyncio.Task | None = None
+
+    parser = argparse.ArgumentParser(description='Optional app description')
+    parser.add_argument('--voice', action=argparse.BooleanOptionalAction)
+    parser.add_argument('--max-context', type=int, default=CONTEXT_LIMIT, metavar='TOKENS',
+                        help='Override context window size (default: 200000). Use a low value to test compression.')
+    args = parser.parse_args()
 
     def on_sigint():
         if active_task and not active_task.done():
@@ -278,8 +417,14 @@ async def main():
     # Mutable list — call_llm mutates in place so history persists across turns.
     conversation_history = []
 
+    if args.voice:
+        from voice import get_voice_input
+
     while True:
-        active_task = asyncio.create_task(get_user_input())
+        if args.voice:
+            active_task = asyncio.create_task(get_voice_input())
+        else:
+            active_task = asyncio.create_task(get_user_input())
         try:
             user_input = await active_task
         except asyncio.CancelledError:
@@ -291,9 +436,14 @@ async def main():
             break
 
         print()
-        active_task = asyncio.create_task(
-            stream_response(user_input, conversation_history)
-        )
+        if args.voice:
+            active_task = asyncio.create_task(
+                stream_response(user_input, conversation_history, voice=True, max_context=args.max_context)
+            )
+        else:
+            active_task = asyncio.create_task(
+                stream_response(user_input, conversation_history, max_context=args.max_context)
+            )
         try:
             await active_task
         except asyncio.CancelledError:
